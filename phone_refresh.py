@@ -21,4 +21,6 @@ sh = gc.open_by_key("1bMMb7RO-xHPxPe7fAwoypHtt__APaLF7E5UMHyFEXHU")
 wk = sh.worksheet('nb_calls_bq')
 list_of_dicts = wk.get_all_records()
 calls_g_cite = pandas.DataFrame(list_of_dicts)
+for i in calls_g_cite.columns:
+    calls_g_cite[i] = calls_g_cite[i].astype(str)
 calls_g_cite.to_gbq(f'sheets.nb_call_raw', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
