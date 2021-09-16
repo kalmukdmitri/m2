@@ -23,4 +23,4 @@ list_of_dicts = wk.get_all_records()
 calls_g_cite = pandas.DataFrame(list_of_dicts)
 for i in calls_g_cite.columns:
     calls_g_cite[i] = calls_g_cite[i].astype(str)
-calls_g_cite.to_gbq(f'sheets.nb_call_raw', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+calls_g_cite.to_gbq(f'sheets.nb_call_raw2', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
