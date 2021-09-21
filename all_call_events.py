@@ -108,7 +108,7 @@ end_date = datetime.datetime.today().date()-datetime.timedelta(days=1)
 if last_date != end_date:
     print('NEWS!')
     call_touch_calls = get_ct_records(last_date,end_date,keys)
-    full_ct.to_gbq(f'sheets.calltouch_calls', project_id='m2-main', if_exists='append', credentials=gbq_credential)
+    call_touch_calls.to_gbq(f'sheets.calltouch_calls', project_id='m2-main', if_exists='append', credentials=gbq_credential)
     
     
 # Создаём таблицу Потерянный звонков для Мобилок и др. целей
