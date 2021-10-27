@@ -19,7 +19,7 @@ def date_pairs(date1, date2, step= 1):
     pairs.reverse()
     return pairs
 
-key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
+key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.UA_TRAFIC_FULL` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
