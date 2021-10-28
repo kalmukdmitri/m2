@@ -4,7 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
 
-key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
+key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
              'https://spreadsheets.google.com/feeds',
