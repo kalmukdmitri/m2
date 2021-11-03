@@ -33,3 +33,77 @@ for i in calls_g_c.columns:
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].astype(int)
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S" ))
 calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+sh = gc.open_by_key("1bTDaGyRRZzWMKS95gDKMwgHf7NScFwPbhbs1y-WCsWI")
+wk = sh.worksheet('export_list')
+list_of_dicts = wk.get_all_values()
+
+df_raw = pandas.DataFrame(list_of_dicts[1:], columns = list_of_dicts[0])
+df_raw = df_raw[df_raw['Date'].apply(lambda x: len(x) == 10)]
+for i in list(df_raw.columns)[1:]:
+    df_raw[i] = df_raw[i].apply(lambda x : float(x.replace(',','.')))
+df_raw['Date'] = df_raw['Date'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d").date())
+df_clean = df_raw.reset_index(drop = True)
+
+ends = []
+for i in df_clean.itertuples():
+    row = [
+        i.Date
+    ]
+    quize_saldo = i.quiez_gain - i.quiez_cost
+    quize_gain_pure = 0 if quize_saldo < 0 else quize_saldo/2
+    quize_cost_pure = i.quiez_cost if quize_saldo < 0 else i.quiez_cost+quize_saldo/2
+    
+    lk_saldo = i.lk_gain - i.lk_cost
+    lk_gain_pure = 0 if lk_saldo < 0 else lk_saldo/2
+    lk_cost_pure = i.lk_cost if lk_saldo < 0 else i.lk_cost+lk_saldo/2
+    
+    choise_saldo = i.choise_gain - i.choise_cost
+    choise_gain_pure = 0 if choise_saldo < 0 else choise_saldo/2
+    choise_cost_pure = i.choise_cost if choise_saldo < 0 else i.choise_cost+choise_saldo/2
+    
+    bot_saldo = i.bot_gain - i.bot_cost
+    bot_gain_pure = 0 if bot_saldo < 0 else bot_saldo/2
+    bot_cost_pure = i.bot_cost if quize_saldo < 0 else i.bot_cost+bot_saldo/2
+    
+    general_cost = i.quiez_cost + i.lk_cost + i.choise_cost + i.bot_cost
+    general_gain = i.quiez_gain + i.lk_gain + i.choise_gain + i.bot_gain
+    general_gain_pure = quize_gain_pure + lk_gain_pure + choise_gain_pure + bot_gain_pure
+    general_cost_pure = quize_cost_pure + lk_cost_pure + choise_cost_pure + bot_cost_pure
+    
+    row_extentdy = [
+        i.quiez_cost,
+        i.quiez_gain,
+        quize_gain_pure,
+        quize_cost_pure,
+        i.lk_cost,
+        i.lk_gain,
+        lk_gain_pure,
+        lk_cost_pure,
+        i.choise_cost,
+        i.choise_gain,
+        choise_gain_pure,
+        choise_cost_pure,
+        i.bot_cost,
+        i.bot_gain,
+        bot_gain_pure,
+        bot_cost_pure,
+        general_cost,
+        general_gain,
+        general_gain_pure,
+        general_cost_pure
+    ]
+    
+    row.extend(row_extentdy)
+    
+    ends.append(row)
+    
+cols = ['Date', 'quiez_cost', 'quiez_gain', 'quize_gain_pure',
+       'quize_cost_pure', 'lk_cost', 'lk_gain', 'lk_gain_pure', 'lk_cost_pure',
+       'choise_cost', 'choise_gain', 'choise_gain_pure', 'choise_cost_pure',
+       'bot_cost', 'bot_gain', 'bot_gain_pure', 'bot_cost_pure',
+       'general_cost', 'general_gain', 'general_gain_pure',
+       'general_cost_pure']
+mambery_calc = pandas.DataFrame(ends, columns = cols)
+mambery_calc['Partner_source'] = 'Mumbery'
+mambery_calc.to_gbq(f'sheets.mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
