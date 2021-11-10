@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 import gspread
 import string
 
-key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
+key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
@@ -107,6 +107,51 @@ cols = ['Date', 'quiez_cost', 'quiez_gain', 'quize_gain_pure',
 mambery_calc = pandas.DataFrame(ends, columns = cols)
 mambery_calc['Partner_source'] = 'Mumbery'
 mambery_calc.to_gbq(f'sheets.mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+full_pds = [] 
+lists = [
+    'РБ СПБ Октябрь',
+    'РБ СПБ Ноябрь'
+]
+for i in lists:
+    wk = sh.worksheet(i)
+    list_of_dict = pandas.DataFrame(wk.get_all_records(i))
+    
+    full_pds.append(list_of_dict)
+full_dt = pandas.concat(full_pds).reset_index(drop=True)
+
+needed = ['Дата ', 'Бюджет/НДС/Айтаргет','Стоимость, продажи']
+full_spb_data = full_dt.drop(columns = [i for i in full_dt.columns if i not in needed])
+full_spb_data.columns = ['Date','costs_raw', 'gains']
+full_spb_data = full_spb_data[full_spb_data['Date'].apply(lambda x: type(x) == str and len(x) == 10 )]
+full_spb_data['costs_raw'] = full_spb_data['costs_raw'].apply(lambda x: x.replace('р.','').replace('\xa0','').split(',')[0]).astype(int)
+full_spb_data['gains'] = full_spb_data['gains'].apply(lambda x: x.replace('р.','').replace('\xa0','').split(',')[0]).astype(int)
+full_spb_data = full_spb_data[full_spb_data['costs_raw'].apply(lambda x: x !=0 )]
+
+ends = []
+for i in full_spb_data.itertuples():
+    row = [
+        i.Date
+    ]
+    quize_saldo = i.gains - i.costs_raw
+    quize_gain_pure = 0 if quize_saldo < 0 else quize_saldo/2
+    quize_cost_pure = i.costs_raw if quize_saldo < 0 else i.costs_raw + (quize_saldo/2)
+    
+    row_extentdy = [
+        i.costs_raw,
+        i.gains,
+        quize_gain_pure,
+        quize_cost_pure,
+    ]
+    
+    row.extend(row_extentdy)
+    
+    ends.append(row)
+    
+cols = ['Date', 'spb_cost', 'spb_gain', 'spb_gain_pure',
+       'spb_cost_pure']
+spb_mambery_calc = pandas.DataFrame(ends, columns = cols)
+spb_mambery_calc.to_gbq(f'sheets.spb_mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 sh = gc.open_by_key("1xI4AJnd9JD4AmZSAaTPZ5XfejVToHq1TArpf4bNrdoA")
 wk = sh.worksheet('Для планерки')
