@@ -50,6 +50,17 @@ all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split('
 all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
 all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
 all_traf_new['date'] = all_traf_new['date'].astype(str)
+
+def decodes(s):
+    import urllib
+    s  = s.replace('%25','%')
+    s2 = urllib.parse.unquote(s)
+    if '%' in s2:
+        s2 = s2.replace('25','')
+        s2 = urllib.parse.unquote(s2)
+    return s2
+
+all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
 all_traf_new.to_gbq(f'UA_REPORTS.UA_TRAFIC_FULL', project_id='m2-main',chunksize=10000, if_exists='append', credentials=gbq_credential)
 
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.UA_ALL_CLOPS` """
@@ -97,3 +108,46 @@ params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
 visit_start = ga_conc.report_pd(dates_couples,params)
 visit_start['dateHourMinute'] = visit_start['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
 visit_start.to_gbq(f'UA_REPORTS.VISITS_DT', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+
+q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.USERS` """
+last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
+dates_couples = date_pairs(start, end)
+
+ga_conc = ga_connect('208464364')
+filtr = ''
+params = {'dimetions':  [{'name': 'ga:date'},
+                         {'name': 'ga:dimension1'},
+                         {'name': 'ga:dimension2'},
+                         {'name': 'ga:dimension3'}],
+        'metrics' : [{'expression': 'ga:users'}],
+        'filters' : filtr}
+
+USERS = ga_conc.report_pd(dates_couples,params)
+USERS.to_gbq(f'UA_REPORTS.USERS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+
+q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.RAW_EVENTS` """
+last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
+dates_couples = date_pairs(start, end)
+filtr = 'ga:eventlabel!~View'
+params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                         {'name': 'ga:dimension4'},
+                         {'name': 'ga:pagepath'},
+                         {'name': 'ga:eventlabel'},            
+                         {'name': 'ga:eventAction'},
+                         {'name': 'ga:eventCategory'}
+                        ],  
+        'metrics':[{'expression': 'ga:users'},
+                   {'expression': 'ga:totalEvents'},
+                   {'expression': 'ga:uniqueEvents'}
+                  ],
+        
+        'filters': filtr
+        }
+ALL_EVENTS = ga_conc.report_pd(dates_couples,params)
+ALL_EVENTS['dateHourMinute'] = ALL_EVENTS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+ALL_EVENTS.to_gbq(f'UA_REPORTS.RAW_EVENTS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+
