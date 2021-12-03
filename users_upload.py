@@ -23,23 +23,26 @@ def date_pairs(date1, date2, step= 1):
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
-q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.USERS` """
+q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+ga_conc = ga_connect('208464364')
 while start < datetime.datetime.today().date():
     dates_couples = date_pairs(start,start)
     start += datetime.timedelta(days=1)
     print(dates_couples)
 
-    ga_conc = ga_connect('208464364')
     filtr = ''
-    params = {'dimetions':  [{'name': 'ga:date'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension2'},
-                             {'name': 'ga:dimension3'}],
-            'metrics' : [{'expression': 'ga:users'}],
-            'filters' : filtr}
+    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:dimension4'},
+                             {'name': 'ga:pagepath'}
+                            ],  
+            'metrics':[{'expression': 'ga:pageviews'}
+                      ],
 
+            'filters': filtr
+            }
+ 
     USERS = ga_conc.report_pd(dates_couples,params)
-    USERS.to_gbq(f'UA_REPORTS.USERS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+    USERS.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
     time.sleep(3)
