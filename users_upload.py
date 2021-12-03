@@ -43,5 +43,6 @@ while start < datetime.datetime.today().date():
             }
  
     USERS = ga_conc.report_pd(dates_couples,params)
+    USERS['dateHourMinute'] = USERS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     USERS.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
     time.sleep(3)
