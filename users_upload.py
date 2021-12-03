@@ -22,10 +22,9 @@ def date_pairs(date1, date2, step= 1):
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-
-q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 ga_conc = ga_connect('208464364')
 while start < datetime.datetime.today().date():
     dates_couples = date_pairs(start,start)
