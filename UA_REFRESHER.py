@@ -36,7 +36,7 @@ start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + date
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-
+ga_conc = ga_connect('208464364')
 if dates_couples != []:
     
     ga_conc = ga_connect('208464364')
