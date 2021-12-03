@@ -136,7 +136,7 @@ if dates_couples != []:
     USERS = ga_conc.report_pd(dates_couples,params)
     USERS.to_gbq(f'UA_REPORTS.USERS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
 
-q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.RAW_EVENTS` """
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.RAW_EVENTS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
