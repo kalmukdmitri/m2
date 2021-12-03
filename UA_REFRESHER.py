@@ -138,7 +138,7 @@ if dates_couples != []:
 
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.RAW_EVENTS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
