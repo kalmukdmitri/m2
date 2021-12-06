@@ -162,3 +162,26 @@ if dates_couples != []:
     ALL_EVENTS = ga_conc.report_pd(dates_couples,params)
     ALL_EVENTS['dateHourMinute'] = ALL_EVENTS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     ALL_EVENTS.to_gbq(f'UA_REPORTS.RAW_EVENTS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+    
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
+last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
+dates_couples = date_pairs(start, end)
+
+if dates_couples != []:
+
+    filtr = ''
+    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:dimension4'},
+                             {'name': 'ga:pagepath'}
+                            ],  
+            'metrics':[{'expression': 'ga:pageviews'}
+                      ],
+
+            'filters': filtr
+            }
+    PAGES = ga_conc.report_pd(dates_couples,params)
+    PAGES['dateHourMinute'] = PAGES['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    PAGES.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+    time.sleep(3)
