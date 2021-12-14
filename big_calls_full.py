@@ -110,26 +110,14 @@ mambery_calc = pandas.DataFrame(ends, columns = cols)
 mambery_calc['Partner_source'] = 'Mumbery'
 mambery_calc.to_gbq(f'sheets.mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
-full_pds = [] 
-lists = [
-    'РБ СПБ Октябрь',
-    'РБ СПБ Ноябрь'
-]
-for i in lists:
-    wk = sh.worksheet(i)
-    list_of_dict = pandas.DataFrame(wk.get_all_records(i))
-    
-    full_pds.append(list_of_dict)
-full_dt = pandas.concat(full_pds).reset_index(drop=True)
-
-needed = ['Дата ', 'Бюджет/НДС/Айтаргет','Стоимость, продажи']
-full_spb_data = full_dt.drop(columns = [i for i in full_dt.columns if i not in needed])
+wk = sh.worksheet('export_list_spb')
+list_of_dicts = wk.get_all_values()
+full_spb_data = pandas.DataFrame(list_of_dicts[1:], columns = list_of_dicts[0])
 full_spb_data.columns = ['Date','costs_raw', 'gains']
 full_spb_data = full_spb_data[full_spb_data['Date'].apply(lambda x: type(x) == str and len(x) == 10 )]
 full_spb_data['costs_raw'] = full_spb_data['costs_raw'].apply(lambda x: x.replace('р.','').replace('\xa0','').split(',')[0]).astype(int)
 full_spb_data['gains'] = full_spb_data['gains'].apply(lambda x: x.replace('р.','').replace('\xa0','').split(',')[0]).astype(int)
 full_spb_data = full_spb_data[full_spb_data['costs_raw'].apply(lambda x: x !=0 )]
-
 ends = []
 for i in full_spb_data.itertuples():
     row = [
@@ -153,7 +141,11 @@ for i in full_spb_data.itertuples():
 cols = ['Date', 'spb_cost', 'spb_gain', 'spb_gain_pure',
        'spb_cost_pure']
 spb_mambery_calc = pandas.DataFrame(ends, columns = cols)
+
+
+
 spb_mambery_calc.to_gbq(f'sheets.spb_mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
 
 sh = gc.open_by_key("1xI4AJnd9JD4AmZSAaTPZ5XfejVToHq1TArpf4bNrdoA")
 wk = sh.worksheet('Для планерки')
