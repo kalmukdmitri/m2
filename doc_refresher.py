@@ -14,7 +14,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
 gc = gspread.authorize(credentials)
 def get_tabel_OPG(month):
     sheet_name_MSK = f'Заявки Мск {month}'
-    sh = gc.open_by_key("1y_EEnKZNU48Pg2Lq7DI1cIBvotvlGp72zdDrEU8mVwU")
+    sh = gc.open_by_key("1idE-rvW68Aby5bysuHO5T2vm813BdvoHnrHxGKr9fgk")
     wk = sh.worksheet(sheet_name_MSK)
     list_of_dicts = wk.get_all_records()
     calls_g_c = pandas.DataFrame(list_of_dicts)
@@ -56,7 +56,7 @@ def get_tabel_OPG(month):
     return full_res
 
 res_list = []
-month_list = ["Октябрь", "Ноябрь","Декабрь"]
+month_list = ["Январь"]
 for i in month_list:
     res_list.append(get_tabel_OPG(i))
 final = pandas.concat(res_list)
@@ -73,9 +73,9 @@ def sheet_ready(df_r):
     return rows
 
 sh = gc.open_by_key("17p9apeWzq_Cg8HnyD25XT-UiHT5-xSI-94bzDjMVooY")
-wk = sh.worksheet('МСК')
+wk = sh.worksheet('МСК 2022')
 g_clop=sheet_ready(final_m)
 wk.update('A1',g_clop)
-wk = sh.worksheet('СПБ')
+wk = sh.worksheet('СПБ 2022')
 g_clop=sheet_ready(final_s)
 wk.update('A1',g_clop)
