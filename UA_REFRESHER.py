@@ -2,6 +2,7 @@ from ga_connector import ga_connect
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
+import bigquery_logger
 import datetime
 import gspread
 import json
@@ -30,40 +31,67 @@ def decodes(s):
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
+
+# Начало лога и начало отсчёта выполнения 
+table_log = bigquery_logger.bq_logger('UA_REPORTS.UA_TRAFIC_FULL')
+
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.UA_TRAFIC_FULL` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
+
 ga_conc = ga_connect('208464364')
-if dates_couples != []:
+
+try:
     
-    ga_conc = ga_connect('208464364')
-    params = {'dimetions':  [{'name': 'ga:date'},
-                             {'name': 'ga:landingpagepath'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:sourcemedium'},                         
-                             {'name': 'ga:campaign'},
-                             {'name': 'ga:adContent'},
-                             {'name': 'ga:keyword'},
-                             {'name': 'ga:deviceCategory'}      
+    if dates_couples != []:
 
-                            ],
-            'metrics':[{'expression': 'ga:users'}
-                      ],
+        params = {'dimetions':  [{'name': 'ga:date'},
+                                 {'name': 'ga:landingpagepath'},
+                                 {'name': 'ga:dimension1'},
+                                 {'name': 'ga:dimension4'},
+                                 {'name': 'ga:sourcemedium'},                         
+                                 {'name': 'ga:campaign'},
+                                 {'name': 'ga:adContent'},
+                                 {'name': 'ga:keyword'},
+                                 {'name': 'ga:deviceCategory'}      
 
-            'filters': ''}
+                                ],
+                'metrics':[{'expression': 'ga:users'}
+                          ],
 
-    all_traf_new = ga_conc.report_pd(dates_couples,params)
-    all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
-    all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
-    all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
-    all_traf_new['date'] = all_traf_new['date'].astype(str)
-    all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
+                'filters': ''}
 
-    all_traf_new.to_gbq(f'UA_REPORTS.UA_TRAFIC_FULL', project_id='m2-main',chunksize=10000, if_exists='append', credentials=gbq_credential)
+        all_traf_new = ga_conc.report_pd(dates_couples,params)
+        
+        # Логируем полученые данные
+        table_log.add_rows_recieved(len(all_traf_new))
+        
+        all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
+        all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
+        all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
+        all_traf_new['date'] = all_traf_new['date'].astype(str)
+        all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
+
+        all_traf_new.to_gbq(f'UA_REPORTS.UA_TRAFIC_FULL', project_id='m2-main',chunksize=10000, if_exists='append', credentials=gbq_credential)
+        # Логируем загружение данные
+        table_log.add_rows_updated(len(all_traf_new))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    # Логируем ошибку
+    table_log.errors_found()
+    
+    
+# Начало лога и начало отсчёта выполнения 
+table_log = bigquery_logger.bq_logger('UA_REPORTS.UA_ALL_CLOPS')
 
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.UA_ALL_CLOPS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
@@ -71,28 +99,48 @@ start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + date
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-if dates_couples != []:
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
+
+try:
     
-    filtr = 'ga:eventlabel=~Phone'
-    params = {'dimetions':  [{'name': 'ga:date'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'},
-                             {'name': 'ga:eventlabel'},            
-                             {'name': 'ga:eventAction'},
-                             {'name': 'ga:eventCategory'}
-                            ],  
-            'metrics':[{'expression': 'ga:users'},
-                       {'expression': 'ga:totalEvents'},
-                       {'expression': 'ga:uniqueEvents'}
-                      ],
+    if dates_couples != []:
 
-            'filters': filtr
-            }
+        filtr = 'ga:eventlabel=~Phone'
+        params = {'dimetions':  [{'name': 'ga:date'},
+                                 {'name': 'ga:dimension1'},
+                                 {'name': 'ga:dimension4'},
+                                 {'name': 'ga:pagepath'},
+                                 {'name': 'ga:eventlabel'},            
+                                 {'name': 'ga:eventAction'},
+                                 {'name': 'ga:eventCategory'}
+                                ],  
+                'metrics':[{'expression': 'ga:users'},
+                           {'expression': 'ga:totalEvents'},
+                           {'expression': 'ga:uniqueEvents'}
+                          ],
 
-    clops = ga_conc.report_pd(dates_couples,params)
-    clops['date'] = clops['date'].astype(str)
-    clops.to_gbq(f'UA_REPORTS.UA_ALL_CLOPS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+                'filters': filtr
+                }
+
+        clops = ga_conc.report_pd(dates_couples,params)
+
+        # Логируем полученые данные
+        table_log.add_rows_recieved(len(clops))
+
+        clops['date'] = clops['date'].astype(str)
+        clops.to_gbq(f'UA_REPORTS.UA_ALL_CLOPS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        table_log.add_rows_updated(len(clops))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    # Логируем ошибку
+    table_log.errors_found()
+    
+table_log = bigquery_logger.bq_logger('UA_REPORTS.VISITS_DT')
 
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.VISITS_DT` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
@@ -100,88 +148,150 @@ start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-if dates_couples != []:
-
-    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension4'}     
-
-                            ],
-            'metrics':[{'expression': 'ga:visits'}
-                      ],
-
-            'filters': ''
-            }
-    visit_start = ga_conc.report_pd(dates_couples,params)
-    visit_start['dateHourMinute'] = visit_start['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-    visit_start.to_gbq(f'UA_REPORTS.VISITS_DT', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
 
 
+try:
+    
+    if dates_couples != []:
+
+        params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                                 {'name': 'ga:dimension4'}     
+
+                                ],
+                'metrics':[{'expression': 'ga:visits'}
+                          ],
+
+                'filters': ''
+                }
+        visit_start = ga_conc.report_pd(dates_couples,params)
+        table_log.add_rows_recieved(len(visit_start))
+        visit_start['dateHourMinute'] = visit_start['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+        visit_start.to_gbq(f'UA_REPORTS.VISITS_DT', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        table_log.add_rows_updated(len(visit_start))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    # Логируем ошибку
+    table_log.errors_found()
+
+table_log = bigquery_logger.bq_logger('UA_REPORTS.USERS')
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.USERS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-if dates_couples != []:
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
 
-    ga_conc = ga_connect('208464364')
-    filtr = ''
-    params = {'dimetions':  [{'name': 'ga:date'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension2'},
-                             {'name': 'ga:dimension3'}],
-            'metrics' : [{'expression': 'ga:users'}],
-            'filters' : filtr}
+try:
 
-    USERS = ga_conc.report_pd(dates_couples,params)
-    USERS.to_gbq(f'UA_REPORTS.USERS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+    if dates_couples != []:
 
+        filtr = ''
+        params = {'dimetions':  [{'name': 'ga:date'},
+                                 {'name': 'ga:dimension1'},
+                                 {'name': 'ga:dimension2'},
+                                 {'name': 'ga:dimension3'}],
+                'metrics' : [{'expression': 'ga:users'}],
+                'filters' : filtr}
+        
+        USERS = ga_conc.report_pd(dates_couples,params)
+        table_log.add_rows_recieved(len(USERS))
+        USERS.to_gbq(f'UA_REPORTS.USERS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        table_log.add_rows_updated(len(USERS))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    # Логируем ошибку
+    table_log.errors_found()
+        
+        
+table_log = bigquery_logger.bq_logger('UA_REPORTS.RAW_EVENTS')
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.RAW_EVENTS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-if dates_couples != []:
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
 
-    filtr = 'ga:eventlabel!~View'
-    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'},
-                             {'name': 'ga:eventlabel'},            
-                             {'name': 'ga:eventAction'},
-                             {'name': 'ga:eventCategory'}
-                            ],  
-            'metrics':[{'expression': 'ga:users'},
-                       {'expression': 'ga:totalEvents'},
-                       {'expression': 'ga:uniqueEvents'}
-                      ],
+try:
 
-            'filters': filtr
-            }
-    ALL_EVENTS = ga_conc.report_pd(dates_couples,params)
-    ALL_EVENTS['dateHourMinute'] = ALL_EVENTS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-    ALL_EVENTS.to_gbq(f'UA_REPORTS.RAW_EVENTS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
-    
+    if dates_couples != []:
+
+        filtr = 'ga:eventlabel!~View'
+        params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                                 {'name': 'ga:dimension4'},
+                                 {'name': 'ga:pagepath'},
+                                 {'name': 'ga:eventlabel'},            
+                                 {'name': 'ga:eventAction'},
+                                 {'name': 'ga:eventCategory'}
+                                ],  
+                'metrics':[{'expression': 'ga:users'},
+                           {'expression': 'ga:totalEvents'},
+                           {'expression': 'ga:uniqueEvents'}
+                          ],
+
+                'filters': filtr
+                }
+        ALL_EVENTS = ga_conc.report_pd(dates_couples,params)
+        table_log.add_rows_updated(len(ALL_EVENTS))
+        ALL_EVENTS['dateHourMinute'] = ALL_EVENTS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+        ALL_EVENTS.to_gbq(f'UA_REPORTS.RAW_EVENTS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        table_log.add_rows_updated(len(ALL_EVENTS))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    # Логируем ошибку
+    table_log.errors_found()
+
+table_log = bigquery_logger.bq_logger('UA_REPORTS.PAGE_VIEWS')    
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+
 end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 dates_couples = date_pairs(start, end)
 
-if dates_couples != []:
+# Логируем отчётные периоды отчёты
+table_log.add_data_start(str(end))
+table_log.add_data_end(str(start))
 
-    filtr = ''
-    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'}
-                            ],  
-            'metrics':[{'expression': 'ga:pageviews'}
-                      ],
+try:
+    
+    if dates_couples != []:
 
-            'filters': filtr
-            }
-    PAGES = ga_conc.report_pd(dates_couples,params)
-    PAGES['dateHourMinute'] = PAGES['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-    PAGES.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
-    time.sleep(3)
+        filtr = ''
+        params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                                 {'name': 'ga:dimension4'},
+                                 {'name': 'ga:pagepath'}
+                                ],  
+                'metrics':[{'expression': 'ga:pageviews'}
+                          ],
+
+                'filters': filtr
+                }
+        PAGES = ga_conc.report_pd(dates_couples,params)
+        table_log.add_rows_updated(len(PAGES))
+        PAGES['dateHourMinute'] = PAGES['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+        PAGES.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        table_log.add_rows_updated(len(PAGES))
+    else:
+        table_log.comment_add('no new data')
+    # Логируем успешное выполнение 
+    table_log.no_errors_found()
+except:
+    table_log.errors_found()
