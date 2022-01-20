@@ -50,7 +50,7 @@ while start < datetime.datetime.today().date():
 
                     'filters': ''}
 
-    all_traf_new = ga_conc.report_pd(starts,params)
+    all_traf_new = ga_conc.report_pd(dates_couples,params)
     
     all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
