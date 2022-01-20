@@ -87,7 +87,7 @@ try:
     table_log.no_errors_found()
 except:
     # Логируем ошибку
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))
     
     
 # Начало лога и начало отсчёта выполнения 
@@ -138,7 +138,7 @@ try:
     table_log.no_errors_found()
 except:
     # Логируем ошибку
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))
     
 table_log = bigquery_logger.bq_logger('UA_REPORTS.VISITS_DT')
 
@@ -177,7 +177,7 @@ try:
     table_log.no_errors_found()
 except:
     # Логируем ошибку
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))
 
 table_log = bigquery_logger.bq_logger('UA_REPORTS.USERS')
 q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.USERS` """
@@ -212,7 +212,7 @@ try:
     table_log.no_errors_found()
 except:
     # Логируем ошибку
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))
         
         
 table_log = bigquery_logger.bq_logger('UA_REPORTS.RAW_EVENTS')
@@ -246,7 +246,7 @@ try:
                 'filters': filtr
                 }
         ALL_EVENTS = ga_conc.report_pd(dates_couples,params)
-        table_log.add_rows_updated(len(ALL_EVENTS))
+        table_log.add_rows_recieved(len(ALL_EVENTS))
         ALL_EVENTS['dateHourMinute'] = ALL_EVENTS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
         ALL_EVENTS.to_gbq(f'UA_REPORTS.RAW_EVENTS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         table_log.add_rows_updated(len(ALL_EVENTS))
@@ -256,7 +256,7 @@ try:
     table_log.no_errors_found()
 except:
     # Логируем ошибку
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))
 
 table_log = bigquery_logger.bq_logger('UA_REPORTS.PAGE_VIEWS')    
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
@@ -285,7 +285,7 @@ try:
                 'filters': filtr
                 }
         PAGES = ga_conc.report_pd(dates_couples,params)
-        table_log.add_rows_updated(len(PAGES))
+        table_log.add_rows_recieved(len(PAGES))
         PAGES['dateHourMinute'] = PAGES['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
         PAGES.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         table_log.add_rows_updated(len(PAGES))
@@ -294,4 +294,4 @@ try:
     # Логируем успешное выполнение 
     table_log.no_errors_found()
 except:
-    table_log.errors_found()
+    table_log.errors_found(str(sys.exc_info()[1]))

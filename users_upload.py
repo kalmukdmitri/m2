@@ -22,8 +22,9 @@ def date_pairs(date1, date2, step= 1):
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.PAGE_VIEWS` """
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.UA_TRAFIC_BIG` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 ga_conc = ga_connect('208464364')
 while start < datetime.datetime.today().date():
@@ -32,17 +33,30 @@ while start < datetime.datetime.today().date():
     print(dates_couples)
 
     filtr = ''
+    
     params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:landingpagepath'},
+                             {'name': 'ga:dimension1'},
                              {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'}
-                            ],  
-            'metrics':[{'expression': 'ga:pageviews'}
-                      ],
+                             {'name': 'ga:sourcemedium'},                         
+                             {'name': 'ga:campaign'},
+                             {'name': 'ga:adContent'},
+                             {'name': 'ga:keyword'},
+                             {'name': 'ga:deviceCategory'}      
 
-            'filters': filtr
-            }
- 
-    USERS = ga_conc.report_pd(dates_couples,params)
-    USERS['dateHourMinute'] = USERS['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-    USERS.to_gbq(f'UA_REPORTS.PAGE_VIEWS', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
-    time.sleep(3)
+                                    ],
+                    'metrics':[{'expression': 'ga:users'}
+                              ],
+
+                    'filters': ''}
+
+    all_traf_new = ga_conc.report_pd(starts,params)
+    
+    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
+    all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
+    all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
+    all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
+    
+    all_traf_new.to_gbq(f'UA_REPORTS.UA_TRAFIC_BIG', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+    time.sleep(10)
