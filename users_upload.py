@@ -20,6 +20,15 @@ def date_pairs(date1, date2, step= 1):
     pairs.reverse()
     return pairs
 
+def decodes(s):
+    import urllib
+    s  = s.replace('%25','%')
+    s2 = urllib.parse.unquote(s)
+    if '%' in s2:
+        s2 = s2.replace('25','')
+        s2 = urllib.parse.unquote(s2)
+    return s2
+
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.UA_TRAFIC_BIG` """
