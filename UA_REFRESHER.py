@@ -9,6 +9,7 @@ import json
 import os
 import pandas
 import pandas_gbq
+import sys
 
 def date_pairs(date1, date2, step= 1):
     pairs= []
