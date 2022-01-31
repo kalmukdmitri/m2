@@ -305,7 +305,7 @@ try:
         table_log.no_errors_found()
     except:
         table_log.errors_found(str(sys.exc_info()[1]))
-    table_log.add_rows_updated(ROWS_ALL_UPDATED)
-    table_log.no_errors_found()
+    table_log_BIG.add_rows_updated(ROWS_ALL_UPDATED)
+    table_log_BIG.no_errors_found()
 except:
-    table_log.errors_found(str(sys.exc_info()[1]))
+    table_log_BIG.errors_found(str(sys.exc_info()[1]))
