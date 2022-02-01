@@ -2,6 +2,7 @@ from apiclient.discovery import build
 from google.oauth2 import service_account
 import datetime
 import pandas
+import time
 
 
 class ga_connect:
@@ -57,6 +58,7 @@ class ga_connect:
                 print('Warning')
             data += report_extra['reports'][0]['data']['rows']
             report_lenth -= 10000
+            time.sleep(3)
         data_table = [i['dimensions'] + i['metrics'][0]['values'] for i in data]           
         return (data_table, columns)
     def report_pd(self,dates_couples, params):
