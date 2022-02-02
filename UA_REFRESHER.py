@@ -122,7 +122,7 @@ tables = [
                 'filters': ''}},
     
     {'name': 'UA_REPORTS.RAW_EVENTS',
-     'funcs' : all_users_transform,
+     'funcs' : all_event_transform,
      'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
