@@ -64,6 +64,8 @@ while start < datetime.datetime.today().date():
         all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
         all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
         all_traf_new['hits'] = all_traf_new['hits'].astype(int)
+        all_traf_new['date']  = all_traf_new['date'].astype(str)
+        all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
         all_traf_new.to_gbq(f'UA_REPORTS.VISIT_QUALITY', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         start += datetime.timedelta(days=1)
         time.sleep(10)
