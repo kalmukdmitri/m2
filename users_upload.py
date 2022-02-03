@@ -33,9 +33,8 @@ key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 q = """SELECT  MAX(date) as date FROM `m2-main.UA_REPORTS.VISIT_QUALITY` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
-
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+
 ga_conc = ga_connect('208464364')
 tries = 200
 while start < datetime.datetime.today().date():
