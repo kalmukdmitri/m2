@@ -31,41 +31,40 @@ def decodes(s):
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.UA_TRAFIC_BIG` """
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.VISIT_QUALITY` """
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 ga_conc = ga_connect('208464364')
+tries = 200
 while start < datetime.datetime.today().date():
-    dates_couples = date_pairs(start,start)
-    start += datetime.timedelta(days=1)
-    print(dates_couples)
-
-    filtr = ''
     
-    params = {'dimetions':  [{'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:landingpagepath'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:sourcemedium'},                         
-                             {'name': 'ga:campaign'},
-                             {'name': 'ga:adContent'},
-                             {'name': 'ga:keyword'},
-                             {'name': 'ga:deviceCategory'}      
+    tries-=1
+    
+    try:
+        dates_couples = date_pairs(start,start)
 
-                                    ],
-                    'metrics':[{'expression': 'ga:users'}
-                              ],
+        print(dates_couples)
 
+
+        params =  {'dimetions': [
+                                 {'name': 'ga:dimension4'},
+                                 {'name': 'ga:dimension1'},
+                                 ],
+                    'metrics':   [
+                                 {'expression': 'ga:bounces'},
+                                 {'expression': 'ga:sessionDuration'},
+                                 {'expression': 'ga:hits'}
+                                 ],
                     'filters': ''}
 
-    all_traf_new = ga_conc.report_pd(dates_couples,params)
-    
-    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-    all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
-    all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
-    all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
-    all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
-    
-    all_traf_new.to_gbq(f'UA_REPORTS.UA_TRAFIC_BIG', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
-    time.sleep(10)
+        all_traf_new = ga_conc.report_pd(dates_couples,params)
+
+        all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
+        all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
+        all_traf_new['hits'] = all_traf_new['hits'].astype(int)
+        all_traf_new.to_gbq(f'UA_REPORTS.VISIT_QUALITY', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        start += datetime.timedelta(days=1)
+        time.sleep(10)
+    except:
+        time.sleep(30)

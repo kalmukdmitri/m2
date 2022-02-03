@@ -137,7 +137,7 @@ tables = [
                              {'expression': 'ga:totalEvents'},
                              {'expression': 'ga:uniqueEvents'}
                              ],
-                'filters': 'ga:eventlabel!~View'}},
+                'filters': 'ga:eventlabel!~View|^(Show)$'}},
     
     {'name': 'UA_REPORTS.PAGE_VIEWS',
      'funcs' : all_event_transform,
