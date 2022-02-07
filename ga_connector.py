@@ -3,10 +3,14 @@ from google.oauth2 import service_account
 import datetime
 import pandas
 import time
+import socket
 
+socket.setdefaulttimeout(300)  # set timeout to 5 minutes
 
 class ga_connect:
     #   Задаём ключ из файла
+    
+#     key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
     key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
     credentials = service_account.Credentials.from_service_account_file(key_path,)
     analytics = build('analyticsreporting', 'v4', credentials=credentials)
@@ -32,7 +36,18 @@ class ga_connect:
                         }]
                     }
         print(body)
-        return ga_connect.analytics.reports().batchGet(body=body).execute()
+        done = False
+        tries = 10
+        while not done and tries > 0:
+            tries -= 1
+            try:
+                print(f'Try {10-tries} started')
+                report = ga_connect.analytics.reports().batchGet(body=body).execute()
+                done = True
+            except:
+                print('fail')
+                time.sleep(10)
+        return report
     def report_get(self, dates, metrics, dimetions, filters):
 #     Отдаём таблицу готовых данных
         report = ga_connect.request(self, dates= dates, metrics = metrics, dimetions = dimetions, filters = filters)
