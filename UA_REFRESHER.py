@@ -60,9 +60,13 @@ def get_start_date(tables):
         last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)  
         start = last_dt['date'][0].date() + datetime.timedelta(days=1)
     elif tables['date_partition'] == 'date':
-        q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.USERS` """
+        q = f"""SELECT  MAX(DATE) as date FROM `m2-main.{table['name']}` """
         last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-        start = datetime.datetime.strptime(last_dt['date'][0],"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
+        if type(last_dt['date'][0]) == pandas._libs.tslibs.timestamps.Timestamp:
+            last_dt = str(last_dt['date'][0])[:10]
+        else:
+            last_dt = last_dt['date'][0]
+        start = datetime.datetime.strptime(last_dt,"%Y-%m-%d" ).date() + datetime.timedelta(days=1)
     return start
 
 
@@ -87,6 +91,15 @@ def all_event_transform(all_traf_new):
     
     return all_traf_new
 
+def all_session_time(all_traf_new):
+    
+    all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
+    all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
+    all_traf_new['hits'] = all_traf_new['hits'].astype(int)
+    all_traf_new['date']  = all_traf_new['date'].astype(str)
+    all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
+    
+    return all_traf_new
 
 tables = [
     {'name': 'UA_REPORTS.UA_TRAFIC_BIG',
@@ -122,7 +135,7 @@ tables = [
                 'filters': ''}},
     
     {'name': 'UA_REPORTS.RAW_EVENTS',
-     'funcs' : all_event_transform,
+     'funcs' : all_users_transform,
      'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -137,7 +150,7 @@ tables = [
                              {'expression': 'ga:totalEvents'},
                              {'expression': 'ga:uniqueEvents'}
                              ],
-                'filters': 'ga:eventlabel!~View|^(Show)$'}},
+                'filters': 'ga:eventlabel!~View'}},
     
     {'name': 'UA_REPORTS.PAGE_VIEWS',
      'funcs' : all_event_transform,
@@ -150,9 +163,22 @@ tables = [
                 'metrics':   [
                              {'expression': 'ga:pageviews'}
                              ],
-                'filters': ''}},    
+                'filters': ''}},
+    {'name': 'UA_REPORTS.VISIT_QUALITY',
+     'funcs' : all_session_time,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                              {'name': 'ga:date'},
+                              {'name': 'ga:dimension4'},
+                              {'name': 'ga:dimension1'},
+                              ],
+                'metrics':   [
+                              {'expression': 'ga:bounces'},
+                              {'expression': 'ga:sessionDuration'},
+                              {'expression': 'ga:hits'}
+                              ],
+                'filters': ''}}
 ]
-
 ga_conc = ga_connect('208464364')
 table_log_BIG = bigquery_logger.bq_logger('UA_REPORTS - ALL_TABLES')
 ROWS_ALL_UPDATED = 0
