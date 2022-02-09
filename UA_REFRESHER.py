@@ -163,6 +163,7 @@ tables = [
 ]
 ga_conc = ga_connect('208464364')
 table_log_BIG = bigquery_logger.bq_logger('UA_REPORTS - ALL_TABLES')
+
 ROWS_ALL_UPDATED = 0
 
 try:
@@ -194,12 +195,14 @@ try:
             table_log.add_rows_updated(len(UA_report))
             ROWS_ALL_UPDATED += len(UA_report)
 
-            table_log.no_errors_found()
+            table_log.()
             
         except:
             
             table_log.errors_found(str(sys.exc_info()[1]))
             
+    table_log_BIG.no_errors_found()    
+    
 except:
     
     table_log_BIG.errors_found(str(sys.exc_info()[1]))
