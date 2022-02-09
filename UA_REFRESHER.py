@@ -195,7 +195,7 @@ try:
             table_log.add_rows_updated(len(UA_report))
             ROWS_ALL_UPDATED += len(UA_report)
 
-            table_log.()
+            table_log.no_errors_found()   
             
         except:
             
