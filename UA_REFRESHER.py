@@ -11,6 +11,8 @@ import pandas
 import pandas_gbq
 import sys
 
+# GENERAL FUNC
+
 def date_pairs(date1, date2, step= 1):
     pairs= []
     while date2 >= date1:
@@ -32,26 +34,6 @@ def decodes(s):
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-
-# GENERAL FUNC
-def date_pairs(date1, date2, step= 1):
-    pairs= []
-    while date2 >= date1:
-        prev_date = date2 - datetime.timedelta(days=step-1) if date2 - datetime.timedelta(days=step) >= date1 else date1
-        pair = [str(prev_date), str(date2)]   
-        date2 -= datetime.timedelta(days=step)
-        pairs.append(pair)
-    pairs.reverse()
-    return pairs
-
-def decodes(s):
-    import urllib
-    s  = s.replace('%25','%')
-    s2 = urllib.parse.unquote(s)
-    if '%' in s2:
-        s2 = s2.replace('25','')
-        s2 = urllib.parse.unquote(s2)
-    return s2
 
 def get_start_date(tables):
     
@@ -135,7 +117,7 @@ tables = [
                 'filters': ''}},
     
     {'name': 'UA_REPORTS.RAW_EVENTS',
-     'funcs' : all_users_transform,
+     'funcs' : all_event_transform,
      'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -150,7 +132,7 @@ tables = [
                              {'expression': 'ga:totalEvents'},
                              {'expression': 'ga:uniqueEvents'}
                              ],
-                'filters': 'ga:eventlabel!~View'}},
+                'filters': 'ga:eventlabel!~View|^(Show)$'}},
     
     {'name': 'UA_REPORTS.PAGE_VIEWS',
      'funcs' : all_event_transform,
