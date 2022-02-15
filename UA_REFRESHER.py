@@ -83,6 +83,17 @@ def all_session_time(all_traf_new):
     
     return all_traf_new
 
+
+def all_users_plus(all_traf_new):
+
+    all_traf_new['date']  = all_traf_new['date'].astype(str)
+    all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
+    
+    return all_traf_new
+
+
+
+
 tables = [
     {'name': 'UA_REPORTS.UA_TRAFIC_BIG',
      'funcs' : all_traffic_transform,
@@ -158,6 +169,21 @@ tables = [
                               {'expression': 'ga:bounces'},
                               {'expression': 'ga:sessionDuration'},
                               {'expression': 'ga:hits'}
+                              ],
+                'filters': ''}},
+     {'name': 'UA_REPORTS.USERS_INTERNAL_ID',
+     'funcs' : all_users_plus,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                              {'name': 'ga:date'},
+                              {'name': 'ga:dimension11'},
+                              {'name': 'ga:dimension1'},
+                              {'name': 'ga:dimension2'},
+                              {'name': 'ga:dimension3'},
+                              {'name': 'ga:dimension4'},
+                              ],
+                'metrics':   [
+                              {'expression': 'ga:users'}
                               ],
                 'filters': ''}}
 ]
