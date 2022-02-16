@@ -48,13 +48,15 @@ def unix_preprocessing(date):
 # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-# q = """SELECT  MAX(date) as date FROM `m2-main.ames.NB_UP_sources` """
-# last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start = datetime.date(2021, 7, 26)
+q = """SELECT  MAX(dateHourMinute) as date FROM `m2-main.ames.NB_UP_sources` """
+last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+
+
 
 ga_conc = ga_connect('208464364')
 tries = 200
-while start < datetime.date(2021, 7, 27):
+while start < datetime.datetime.today().date():
     
     tries-=1
     
@@ -77,18 +79,13 @@ while start < datetime.date(2021, 7, 27):
                     'filters': 'ga:previousPagePath=~/nedvizhimost;ga:pagePath=~/novostr'}
 
         all_traf_new = ga_conc.report_pd(dates_couples,params)
+        all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
 
-#         all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
-#         all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
-#         all_traf_new['hits'] = all_traf_new['hits'].astype(int)
-#         all_traf_new['date']  = all_traf_new['date'].astype(str)
-#         all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
         all_traf_new['dimension5'] = [unix_preprocessing(words) for words in all_traf_new['dimension5']]
 
         all_traf_new.to_gbq(f'ames.NB_UP_sources', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         start += datetime.timedelta(days=1)
         time.sleep(10)
-        start += datetime.timedelta(days=1)
     except:
         time.sleep(30)
         start += datetime.timedelta(days=1)
