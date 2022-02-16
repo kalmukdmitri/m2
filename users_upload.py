@@ -9,6 +9,7 @@ import os
 import pandas
 import time
 import pandas_gbq
+import re
 
 def date_pairs(date1, date2, step= 1):
     pairs= []
@@ -20,24 +21,40 @@ def date_pairs(date1, date2, step= 1):
     pairs.reverse()
     return pairs
 
-def decodes(s):
-    import urllib
-    s  = s.replace('%25','%')
-    s2 = urllib.parse.unquote(s)
-    if '%' in s2:
-        s2 = s2.replace('25','')
-        s2 = urllib.parse.unquote(s2)
-    return s2
+# def decodes(s):
+#     import urllib
+#     s  = s.replace('%25','%')
+#     s2 = urllib.parse.unquote(s)
+#     if '%' in s2:
+#         s2 = s2.replace('25','')
+#         s2 = urllib.parse.unquote(s2)
+#     return s2
 
+def unix_preprocessing(date):
+    if ":" in date:
+        text = date.lower()
+        text = re.sub('[a-zA-Z]+', ' ', text)
+        text = re.sub('\+[0-9]+', ' ', text)
+        text = re.sub('\.[0-9]+', ' ', text)
+        text = re.sub('\ :[0-9]+', ' ', text)
+        text = re.sub('\ -[0-9]+', ' ', text)
+        text = re.sub('\ :[0-9]+', '', text)
+        return text.strip()        
+    else:
+        unix_timestamp = float(date)
+        a = (datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'))
+    return a 
+
+# key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-q = """SELECT  MAX(date) as date FROM `m2-main.UA_REPORTS.VISIT_QUALITY` """
-last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+# q = """SELECT  MAX(date) as date FROM `m2-main.ames.NB_UP_sources` """
+# last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+start = datetime.date(2021, 7, 26)
 
 ga_conc = ga_connect('208464364')
 tries = 200
-while start < datetime.datetime.today().date():
+while start < datetime.date(2021, 7, 27):
     
     tries-=1
     
@@ -48,26 +65,30 @@ while start < datetime.datetime.today().date():
 
 
         params =  {'dimetions': [
-                                 {'name': 'ga:date'},
-                                 {'name': 'ga:dimension4'},
-                                 {'name': 'ga:dimension1'},
+                                 {'name': 'ga:dateHourMinute'},
+                                 {'name': 'ga:dimension5'}, #hittimestamp
+                                 {'name': 'ga:previousPagePath'},
+                                 {'name': 'ga:pagePath'},
+                                 {'name': 'ga:dimension4'}
                                  ],
                     'metrics':   [
-                                 {'expression': 'ga:bounces'},
-                                 {'expression': 'ga:sessionDuration'},
-                                 {'expression': 'ga:hits'}
+                                 {'expression': 'ga:users'}
                                  ],
-                    'filters': ''}
+                    'filters': 'ga:previousPagePath=~/nedvizhimost;ga:pagePath=~/novostr'}
 
         all_traf_new = ga_conc.report_pd(dates_couples,params)
 
-        all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
-        all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
-        all_traf_new['hits'] = all_traf_new['hits'].astype(int)
-        all_traf_new['date']  = all_traf_new['date'].astype(str)
-        all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
-        all_traf_new.to_gbq(f'UA_REPORTS.VISIT_QUALITY', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+#         all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
+#         all_traf_new['sessionDuration'] = all_traf_new['sessionDuration'].astype(float)
+#         all_traf_new['hits'] = all_traf_new['hits'].astype(int)
+#         all_traf_new['date']  = all_traf_new['date'].astype(str)
+#         all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
+        all_traf_new['dimension5'] = [unix_preprocessing(words) for words in all_traf_new['dimension5']]
+
+        all_traf_new.to_gbq(f'ames.NB_UP_sources', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         start += datetime.timedelta(days=1)
         time.sleep(10)
+        start += datetime.timedelta(days=1)
     except:
         time.sleep(30)
+        start += datetime.timedelta(days=1)
