@@ -29,7 +29,8 @@ headers = {
         }
 
 rest = requests.get(q2, headers= headers)
-garantiya = pandas.DataFrame(rest.json())
+garantiya_data = pandas.DataFrame(rest.json())
+garantiya = garantiya_data.copy()
 garantiya['product'] = 'GD'
 
 # ПРОДУКТ ПРОВЕРКА
@@ -44,11 +45,12 @@ headers = {
         }
 
 rest = requests.get(q2, headers= headers)
-check = pandas.DataFrame(rest.json())
+check_data = pandas.DataFrame(rest.json())
+check = check_data.copy()
 check['product'] = 'CK'
 products = pandas.concat([check,garantiya]).reset_index(drop=True)
 
-needed_cols =  ['orderid', 'success_datetime','product']
+needed_cols =  ['orderid', 'success_datetime','product', 'pay_amount']
 products = products.drop(columns = [i for i in products.columns if i not in needed_cols ])
 products['date'] = products['success_datetime'].apply(lambda x: datetime.datetime.strptime(x[:10],"%Y-%m-%d" ).date())
 products = products.drop(columns = ['success_datetime'])
@@ -65,13 +67,32 @@ headers2 = {
 
 
 rest = requests.get(q2, headers= headers2)
-pokupka = pandas.DataFrame(rest.json())
+pokupka_data = pandas.DataFrame(rest.json())
+pokupka_data = pokupka_data[pokupka_data['client_phone'].apply(lambda x : '79680980748' not in x)]
+pokupka_data = pokupka_data[pokupka_data['client_email'].apply(lambda x : '79312558282' not in x)]
+pokupka = pokupka_data.copy()
 pokupka['product'] = 'PO'
-needed_cols =  ['orderid', 'paid_datetime','product']
+needed_cols =  ['orderid', 'paid_datetime','product' , 'pay_amount']
 pokupka = pokupka.drop(columns = [i for i in pokupka.columns if i not in needed_cols ])
 pokupka['date'] = pokupka['paid_datetime'].apply(lambda x: datetime.datetime.strptime(x[:10],"%Y-%m-%d" ).date())
 pokupka = pokupka.drop(columns = ['paid_datetime'])
 products = pandas.concat([products,pokupka]).reset_index(drop=True)
 products['date'] = pandas.to_datetime(products['date'])
-
+products['pay_amount'] = products['pay_amount'].astype(float)
 products.to_gbq(f'EXTERNAL_DATA_SOURCES.PAYKEEPERS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+needed_cols =  ['orderid', 'paid_datetime','product' , 'pay_amount' , 'client_email', 'client_phone']
+pokupka_full = pokupka_data.drop(columns = [i for i in pokupka_data.columns if i not in needed_cols ])
+pokupka_full['paid_datetime'] = pokupka_full['paid_datetime'].apply(lambda x: datetime.datetime.strptime(x[:10],"%Y-%m-%d" ).date())
+
+def b64_hid(s):
+
+    b = s.encode("UTF-8")
+    e = base64.b64encode(b)
+    s1 = e.decode("UTF-8")
+    return s1
+
+pokupka_full['client_phone'] = pokupka_full['client_phone'].apply(b64_hid)
+pokupka_full['client_email'] = pokupka_full['client_email'].apply(b64_hid)
+pokupka_full['pay_amount']  = pokupka_full['pay_amount'].astype(float)
+pokupka_full.to_gbq(f'EXTERNAL_DATA_SOURCES.PAYKEEPERS_PO_FULL', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
