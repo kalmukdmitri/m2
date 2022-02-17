@@ -59,5 +59,4 @@ def b64_hid(s):
     return s1
 ib_result['Client'] = ib_result['Client'].apply(b64_hid)
 
-
 ib_result.to_gbq(f'GOOGLE_SHEETS_DATA.IB_FINISED', project_id='m2-main', if_exists='replace', credentials=gbq_credential)

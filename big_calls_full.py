@@ -147,30 +147,21 @@ spb_mambery_calc = pandas.DataFrame(ends, columns = cols)
 spb_mambery_calc.to_gbq(f'sheets.spb_mumbery_data', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 
-sh = gc.open_by_key("1xI4AJnd9JD4AmZSAaTPZ5XfejVToHq1TArpf4bNrdoA")
+sh = gc.open_by_key("17c4a0gmXkbAEaDgoo03YkdRKCiB7nTsM_077GJC3noo")
 wk = sh.worksheet('Для планерки')
 list_of_dicts = wk.get_all_values()
-results = []
-for i in list_of_dicts[3:]:
-    if i[1] != '' and '*' not in i[1] and i[4] != '' :
-        res = i[1:3] + i[4:7]
-        results.append(res)
-data_UP = pandas.DataFrame(results)
+
+dt = pandas.DataFrame(list_of_dicts)
+dt = dt[dt[1].apply(lambda x: x != '' and '*' not in  x )].reset_index(drop = True).drop(columns =  [i for i in  range(7,len(dt.columns))])
+data_UP = dt.drop(columns =  [0,2,3]).loc[1:].reset_index(drop = True)
+data_UP.columns = ['week1', 'market_cost', 'gain_all', 'gain_vas']
 for i in data_UP:
     data_UP[i] = data_UP[i].apply(lambda x: x.replace('\xa0','').replace('р.',''))
     try:
         data_UP[i] = data_UP[i].astype(int)
     except:
         continue
-cols = ['week1',
-        'week2',
-        'market_cost',
-        'gain_all',
-        'gain_vas'
-       ]
-data_UP.columns = cols
-data_UP['week1'] = data_UP['week1'].apply(lambda x: datetime.datetime.strptime(x,"%d.%m.%Y").date())
-data_UP['week2'] = data_UP['week2'].apply(lambda x: datetime.datetime.strptime(x,"%d.%m.%Y").date())
+data_UP['week1'] = data_UP['week1'].apply(lambda x: datetime.datetime.strptime(x,"%d.%m.%Y"))
 ends = []
 for week in data_UP.itertuples():
     for stp in range(7):
@@ -192,8 +183,7 @@ cols = ['week1',
         'gain_all',
         'gain_vas'
        ]
-calends = pandas.DataFrame(ends)
-calends.columns = cols
+calends = pandas.DataFrame(ends , columns =cols )
 calends = calends.drop(columns = ['isoweek','week1'])
 
-calends.to_gbq(f'sheets.UP_gains', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+calends.to_gbq(f'GOOGLE_SHEETS_DATA.UP_REPORTED_DATA_2022', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
