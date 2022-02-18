@@ -42,7 +42,7 @@ def unix_preprocessing(date):
         return text.strip()        
     else:
         unix_timestamp = float(date)
-        a = (datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'))
+        a = (datetime.datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'))
     return a 
 
 # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
