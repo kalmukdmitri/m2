@@ -45,13 +45,26 @@ def get_calls(start,end):
                 params[j].append(k)
             else:
                 params[j] =[k]
-    n  = ['callId','timestamp','callerNumber','callbackCall',
-      'uniqueCall', 'targetCall', 'uniqTargetCall','successful',
-      'source', 'medium','keyword',
-      'utmSource','utmMedium', 'utmCampaign','utmContent','utmTerm',
-      'clientId',
-      'timestamp'
-     ]
+    n = ['callId',
+     'timestamp',
+     'callerNumber',
+     'phoneNumber',
+     'callbackCall',
+     'uniqueCall',
+     'targetCall',
+     'uniqTargetCall',
+     'successful',
+     'source',
+     'medium',
+     'keyword',
+     'utmSource',
+     'utmMedium',
+     'utmCampaign',
+     'utmContent',
+     'utmTerm',
+     'clientId',
+     'url',
+     'callUrl']
     df_call = pandas.DataFrame(params)
     
     drps = [ i for i in list(df_call.columns) if i not in n ]
