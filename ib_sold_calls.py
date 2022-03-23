@@ -60,3 +60,47 @@ def b64_hid(s):
 ib_result['Client'] = ib_result['Client'].apply(b64_hid)
 
 ib_result.to_gbq(f'GOOGLE_SHEETS_DATA.IB_FINISED', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+def get_tabel_OPG(month):
+    sheet_name_MSK = f'Заявки Мск {month}'
+    sh = gc.open_by_key("1idE-rvW68Aby5bysuHO5T2vm813BdvoHnrHxGKr9fgk")
+    wk = sh.worksheet(sheet_name_MSK)
+    list_of_dicts = wk.get_all_records()
+    calls_g_msk = pandas.DataFrame(list_of_dicts)
+
+    
+    calls_g_msk = calls_g_msk[calls_g_msk['Дата']!='']
+    
+    sheet_name_SPB = f'Заявки СПб {month}'
+    wk = sh.worksheet(sheet_name_SPB)
+    list_of_dicts = wk.get_all_records()
+    calls_g_spb = pandas.DataFrame(list_of_dicts)
+
+    calls_g_spb = calls_g_spb[calls_g_spb['Дата']!='']
+
+    full_res = pandas.concat([calls_g_msk, calls_g_spb]).reset_index(drop = True)
+    return full_res
+
+
+
+res_list = []
+month_list = ["Январь", "Февраль", "Март"]
+for i in month_list:
+    res_list.append(get_tabel_OPG(i))
+final = pandas.concat(res_list).reset_index(drop = True)
+needed_M = ['Источник', 'Дата', 'Номер телефона',
+'Статус обращения', 'Рекламный источник',
+ 'Срок покупки','Результат','Стоимость', 'Способ покупки']
+drps = [i for i in list(final.columns) if i not in needed_M] 
+final_opg = final.drop(columns = drps)
+final_opg['Дата'] = final_opg['Дата'].apply(lambda x: x.replace('2022-01-28' , '28-01-2022'))
+final_opg['Дата'] = final_opg['Дата'].apply(lambda x: datetime.datetime.strptime(x.replace('.','-'),"%d-%m-%Y" ))
+cols = ['SOURCE_OPG', 'DATE', 'CALLER_NUMBER',
+'PARTNER_TYPE', 'AD_SOURCE',
+ 'TIME_BUY','RESULT_CALL','SALE_AMOUNT', 'METHOD_BUY']
+print('update')
+
+final_opg.columns = cols
+final_opg['SALE_AMOUNT'] = final_opg['SALE_AMOUNT'].apply(lambda x : x if type(x) == int else 0)
+final_opg['METHOD_BUY'] = final_opg['METHOD_BUY'].astype(str)
+final_opg.to_gbq(f'GOOGLE_SHEETS_DATA.OPG_CALLS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
