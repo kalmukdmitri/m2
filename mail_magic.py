@@ -128,3 +128,57 @@ sh = gc.open_by_key("1bvHgVst-i1-xRu6xAnAo8t2xKpV_9Fkmm_j__T2nqhU")
 wk = sh.worksheet('Заявки Квиз')
 g_clop=sheet_ready(clean_mail)
 wk.update('A1',g_clop)
+
+
+q = """
+WITH
+  QUIZ AS (
+  SELECT
+    subject,
+date AS datetime,
+extract(date from date) as date_lead,
+    date,
+    PHONE,
+    ID,
+    GEO,
+    ROOMS,
+    TIME,
+    COSTS,
+    Extra,
+    quiz_source,
+    utm_source,
+    utm_medium,
+    utm_campaign
+  FROM
+    `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA` ), 
+CALLS AS (
+  SELECT
+extract(date from date_time) as date ,caller, sale_state
+FROM `m2-main.sheets.NB_ALL_CALLS`
+group by 1,2,3
+)
+
+SELECT 
+QUIZ.date as date,
+    PHONE,
+    ID,
+    GEO,
+    ROOMS,
+    TIME,
+    COSTS,
+    Extra,
+    quiz_source,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    sale_state
+FROM QUIZ
+LEFT JOIN CALLS ON  caller= PHONE 
+AND QUIZ.date_lead = CALLS.date
+""" 
+sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+
+sh = gc.open_by_key("1bvHgVst-i1-xRu6xAnAo8t2xKpV_9Fkmm_j__T2nqhU")
+wk = sh.worksheet('Заявки Квиз c продажами')
+g_clop=sheet_ready(sales)
+wk.update('A1',g_clop)
