@@ -40,7 +40,7 @@ mail_dict = {
     'date': [],
     'body': []
 }
-all_inbox_messages = box.messages()
+all_inbox_messages = box.messages(sent_from='call-back-novostroyki@service-m2.ru')
 for uid, message in all_inbox_messages:
     
     if message.sent_from[0]['email'] == 'call-back-novostroyki@service-m2.ru' and 'Inhouse' in message.subject:
@@ -153,7 +153,7 @@ extract(date from date) as date_lead,
     `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA` ), 
 CALLS AS (
   SELECT
-extract(date from date_time) as date ,caller, sale_state
+extract(date from date_time) as date ,caller, sale_state ,MAX(sold_sum)
 FROM `m2-main.sheets.NB_ALL_CALLS`
 group by 1,2,3
 )
@@ -175,6 +175,7 @@ QUIZ.date as date,
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
 AND QUIZ.date_lead = CALLS.date
+WHERE sale_state = "Продан"
 """ 
 sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
