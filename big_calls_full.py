@@ -148,22 +148,24 @@ spb_mambery_calc.to_gbq(f'sheets.spb_mumbery_data', project_id='m2-main', if_exi
 
 
 sh = gc.open_by_key("17c4a0gmXkbAEaDgoo03YkdRKCiB7nTsM_077GJC3noo")
-wk = sh.worksheet('Для планерки')
+wk = sh.worksheet('export_list')
 list_of_dicts = wk.get_all_values()
-
 dt = pandas.DataFrame(list_of_dicts)
-dt = dt[dt[1].apply(lambda x: x != '' and '*' not in  x )].reset_index(drop = True).drop(columns =  [i for i in  range(7,len(dt.columns))])
-data_UP = dt.drop(columns =  [0,2,3]).loc[1:].reset_index(drop = True)
-data_UP.columns = ['week1', 'market_cost', 'gain_all', 'gain_vas']
-for i in data_UP:
-    data_UP[i] = data_UP[i].apply(lambda x: x.replace('\xa0','').replace('р.',''))
+dt.columns = ['week1', 'market_cost', 'gain_all', 'gain_vas' , 'VAS_manual']
+dt = dt[1:]
+dt = dt[dt["week1"].apply(lambda x: x != '' and '*' not in  x )].reset_index(drop = True)
+for i in dt:
+    dt[i] = dt[i].apply(lambda x: x.replace('\xa0','').replace('р.','').replace(',','.'))
     try:
-        data_UP[i] = data_UP[i].astype(int)
+        dt[i] = dt[i].astype(float)
+        dt[i] = dt[i].astype(int)
     except:
         continue
-data_UP['week1'] = data_UP['week1'].apply(lambda x: datetime.datetime.strptime(x,"%d.%m.%Y"))
+dt['week1'] = dt['week1'].apply(lambda x: datetime.datetime.strptime(x,"%d.%m.%Y"))
+dt['gain_vas'] = dt['gain_vas']+ dt['VAS_manual']
+dt= dt.drop(columns = "VAS_manual")
 ends = []
-for week in data_UP.itertuples():
+for week in dt.itertuples():
     for stp in range(7):
         week_num = week.week1.isocalendar()[1]
         date = week.week1 + datetime.timedelta(days=stp)
@@ -185,5 +187,4 @@ cols = ['week1',
        ]
 calends = pandas.DataFrame(ends , columns =cols )
 calends = calends.drop(columns = ['isoweek','week1'])
-
 calends.to_gbq(f'GOOGLE_SHEETS_DATA.UP_REPORTED_DATA_2022', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
