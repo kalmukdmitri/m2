@@ -171,7 +171,8 @@ QUIZ.date as date,
     utm_source,
     utm_medium,
     utm_campaign,
-    sale_state
+    sale_state,
+    sold_sum
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
 AND QUIZ.date_lead = CALLS.date
