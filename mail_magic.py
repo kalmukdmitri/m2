@@ -153,7 +153,7 @@ extract(date from date) as date_lead,
     `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA` ), 
 CALLS AS (
   SELECT
-extract(date from date_time) as date ,caller, sale_state ,MAX(sold_sum)
+extract(date from date_time) as date ,caller, sale_state ,MAX(sold_sum) as sold_sum 
 FROM `m2-main.sheets.NB_ALL_CALLS`
 group by 1,2,3
 )
