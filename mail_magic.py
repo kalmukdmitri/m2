@@ -82,7 +82,7 @@ def parse_body(bod):
     for i in clean_split_str:
         if ': ' in i:
             param,vals = i.split(': ')
-            final_dict[param] = vals[1:]
+            final_dict[param] = vals[:]
         else:
             final_dict["ДопИнформация"] += i+"; "
     return final_dict
