@@ -52,6 +52,7 @@ for uid, message in all_inbox_messages:
         mail_dict['body'].append(message.body['plain'])
         
 mail_raw_pd = pandas.DataFrame(mail_dict)
+
 def parse_utm(utms):
     utms = utms.split('&')
     params = {
@@ -63,7 +64,8 @@ def parse_utm(utms):
     'utm_term':""}
     for i in utms:
         if '=' in i:
-            param,vals = i.split('=')
+            print(i)
+            param,vals = i.split('=')[0], "=".join(i.split('=')[1:])
             params[param] = vals
     return params
 
