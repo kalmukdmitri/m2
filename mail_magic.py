@@ -64,7 +64,6 @@ def parse_utm(utms):
     'utm_term':""}
     for i in utms:
         if '=' in i:
-            print(i)
             param,vals = i.split('=')[0], "=".join(i.split('=')[1:])
             params[param] = vals
     return params
