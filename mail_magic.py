@@ -80,8 +80,8 @@ def parse_body(bod):
                      'Телефон': '',
                      'Query': ''}
     for i in clean_split_str:
-        if ':' in i:
-            param,vals = i.split(':')
+        if ': ' in i:
+            param,vals = i.split(': ')
             final_dict[param] = vals[1:]
         else:
             final_dict["ДопИнформация"] += i+"; "
