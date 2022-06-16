@@ -7,6 +7,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
 import string
+from google.cloud import bigquery
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 
@@ -15,6 +16,14 @@ SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
              'https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
 credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
+bigquery_client = bigquery.Client.from_service_account_json(key_path)
+
+q = """
+    delete from m2-main.sheets.NB_ALL_CALLS
+    where extract(month from date_time) = extract(month from CURRENT_DATE()) 
+  and extract(year from date_time) = extract(year from CURRENT_DATE())
+"""
+job = bigquery_client.query(q)
 
 gc = gspread.authorize(credentials)
 sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
@@ -34,7 +43,9 @@ for i in calls_g_c.columns:
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].astype(int)
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S" ))
 calls_g_c = calls_g_c.drop(columns = ['date_broken'])
-calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+calls_g_c = calls_g_c[calls_g_c.date_time.dt.year == datetime.datetime.today().year] \
+                    [calls_g_c.date_time.dt.month == datetime.datetime.today().month]
+calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 
 sh = gc.open_by_key("1bTDaGyRRZzWMKS95gDKMwgHf7NScFwPbhbs1y-WCsWI")
 wk = sh.worksheet('export_list')
