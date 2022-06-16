@@ -48,7 +48,7 @@ calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
 
 # calls_g_c['comment'] = calls_g_c['comment'].apply(de_BOM)
 
-calls_g_c['comment' = '-'
+calls_g_c['comment'] = '-'
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
 calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].apply(lambda x: 0 if '-' == x else x)
