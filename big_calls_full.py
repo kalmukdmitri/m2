@@ -48,6 +48,7 @@ calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
 
 # calls_g_c['comment'] = calls_g_c['comment'].apply(de_BOM)
 
+calls_g_c['jk'] = calls_g_c['jk'].apply(de_BOM)
 calls_g_c['comment'] = '-'
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
 calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
@@ -60,7 +61,7 @@ calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetim
 calls_g_c = calls_g_c.drop(columns = ['date_broken'])
 calls_g_c = calls_g_c[calls_g_c.date_time.dt.year == datetime.datetime.today().year] \
                     [calls_g_c.date_time.dt.month == datetime.datetime.today().month]
-calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='append', credentials=gbq_credential)
+calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS2', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 
 sh = gc.open_by_key("1bTDaGyRRZzWMKS95gDKMwgHf7NScFwPbhbs1y-WCsWI")
 wk = sh.worksheet('export_list')
