@@ -46,7 +46,7 @@ calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
 calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('\\', '') if type(x) == str and '\\'  in x  else x )
 calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('/', '') if type(x) == str and '/'  in x  else x )
 
-calls_g_c['comment'] = calls_g_c['comment'].de_BOM(test_s)
+calls_g_c['comment'] = calls_g_c['comment'].apply(de_BOM)
 
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
 calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
