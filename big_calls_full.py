@@ -30,14 +30,18 @@ sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
 wk = sh.worksheet('Лист1')
 list_of_dicts = wk.get_all_records()
 
-def de_BOM(s):
+def max_sintise(str_raw):
+    if type(str_raw) == str:
+        legal = """АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнРрОоПпСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-:;., !:«»"""
+        str_raw = "".join([i for i in str_raw if i in legal])
+    else:
+        str_raw = str_raw
+    return str_raw
 
-    s = s.encode('utf-8-sig')
-    s = s.decode('utf-8')
-    return s
-
-
-
+gc = gspread.authorize(credentials)
+sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
+wk = sh.worksheet('Лист1')
+list_of_dicts = wk.get_all_records()
 calls_g_c = pandas.DataFrame(list_of_dicts)
 calls_g_c = calls_g_c[calls_g_c['date_time'] !=  '']
 calls_g_c = calls_g_c[calls_g_c['date_time'] !=  '-']
@@ -45,10 +49,6 @@ calls_g_c = calls_g_c.drop(columns = ['empt1', 'empt2', 'empt3','empt4'])
 calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
 # calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('\\', '') if type(x) == str and '\\'  in x  else x )
 # calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('/', '') if type(x) == str and '/'  in x  else x )
-
-# calls_g_c['comment'] = calls_g_c['comment'].apply(de_BOM)
-
-calls_g_c['jk'] = calls_g_c['jk'].apply(de_BOM)
 calls_g_c['comment'] = '-'
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
 calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
@@ -56,12 +56,13 @@ calls_g_c['sold_sum'] = calls_g_c['sold_sum'].apply(lambda x: 0 if '-' == x else
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].apply(lambda x: 0 if x == '' else x)
 for i in calls_g_c.columns:
     calls_g_c[i] = calls_g_c[i].astype(str)
+    calls_g_c[i] = calls_g_c[i].apply(max_sintise)
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].astype(int)
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S" ))
 calls_g_c = calls_g_c.drop(columns = ['date_broken'])
 calls_g_c = calls_g_c[calls_g_c.date_time.dt.year == datetime.datetime.today().year] \
                     [calls_g_c.date_time.dt.month == datetime.datetime.today().month]
-calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS2', project_id='m2-main', if_exists='append', credentials=gbq_credential)
+calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 
 sh = gc.open_by_key("1bTDaGyRRZzWMKS95gDKMwgHf7NScFwPbhbs1y-WCsWI")
 wk = sh.worksheet('export_list')
