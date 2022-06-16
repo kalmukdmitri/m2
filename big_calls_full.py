@@ -29,6 +29,15 @@ gc = gspread.authorize(credentials)
 sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
 wk = sh.worksheet('Лист1')
 list_of_dicts = wk.get_all_records()
+
+def de_BOM(s):
+
+    s = s.encode('utf-8-sig')
+    s = s.decode('utf-8')
+    return s
+
+
+
 calls_g_c = pandas.DataFrame(list_of_dicts)
 calls_g_c = calls_g_c[calls_g_c['date_time'] !=  '']
 calls_g_c = calls_g_c[calls_g_c['date_time'] !=  '-']
@@ -36,6 +45,9 @@ calls_g_c = calls_g_c.drop(columns = ['empt1', 'empt2', 'empt3','empt4'])
 calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
 calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('\\', '') if type(x) == str and '\\'  in x  else x )
 calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('/', '') if type(x) == str and '/'  in x  else x )
+
+calls_g_c['comment'] = calls_g_c['comment'].de_BOM(test_s)
+
 calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
 calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
 calls_g_c['sold_sum'] = calls_g_c['sold_sum'].apply(lambda x: 0 if '-' == x else x)
