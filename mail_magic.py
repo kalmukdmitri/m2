@@ -88,6 +88,15 @@ def parse_body(bod):
             final_dict["ДопИнформация"] += i+"; "
     return final_dict
 
+def decodes(s):
+    import urllib
+    s  = s.replace('%25','%') #зачем?
+    s2 = urllib.parse.unquote(s)
+    if '%' in s2:
+        s2 = s2.replace('25','')
+        s2 = urllib.parse.unquote(s2)
+    return s2
+
 mail_raw_pd['dict'] = mail_raw_pd['body'].apply(parse_body)
 mail_raw_pd['PHONE'] = mail_raw_pd['dict'].apply(lambda x: x['Телефон'])
 mail_raw_pd['ID'] =  mail_raw_pd['dict'].apply(lambda x: x['ID'])
@@ -97,7 +106,7 @@ mail_raw_pd['TIME'] =  mail_raw_pd['dict'].apply(lambda x: x['Срок сдач�
 mail_raw_pd['COSTS'] =  mail_raw_pd['dict'].apply(lambda x: x['Бюджет'])
 mail_raw_pd['Extra'] =  mail_raw_pd['dict'].apply(lambda x: x['ДопИнформация'])
 mail_raw_pd['UTMS'] =  mail_raw_pd['dict'].apply(lambda x: x['Query'])
-mail_raw_pd['dict_utm'] = mail_raw_pd['UTMS'].apply(parse_utm)
+mail_raw_pd['dict_utm'] = mail_raw_pd['UTMS'].apply(decodes).apply(parse_utm)
 mail_raw_pd['utm_source'] = mail_raw_pd['dict_utm'].apply(lambda x: x['utm_source'])
 mail_raw_pd['utm_medium'] =  mail_raw_pd['dict_utm'].apply(lambda x: x['utm_medium'])
 mail_raw_pd['utm_campaign'] =  mail_raw_pd['dict_utm'].apply(lambda x: x['utm_campaign'])
