@@ -74,8 +74,11 @@ try:
                         [calls_g_c.date_time.dt.month == datetime.datetime.today().month]
     calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='append', credentials=gbq_credential)
     
+    print(len(calls_g_c))
+    table_log.add_rows_recieved(len(calls_g_c))
     table_log.add_rows_updated(len(calls_g_c))
-    table_log.no_errors_found()  
+    table_log.no_errors_found()
+    
 
 except:
     table_log.errors_found(str(sys.exc_info()[1]))
