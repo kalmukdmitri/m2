@@ -7,6 +7,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
 import string
+import bigquery_logger
 from google.cloud import bigquery
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
