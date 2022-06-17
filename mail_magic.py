@@ -187,10 +187,12 @@ FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
 AND QUIZ.date_lead = CALLS.date
 WHERE sale_state = "Продан"
+ORDER BY 1 asc
 """ 
 sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-
+sales['date'] = sales['date'].apply(lambda x : str(x)[:19])
 sh = gc.open_by_key("1bvHgVst-i1-xRu6xAnAo8t2xKpV_9Fkmm_j__T2nqhU")
+
 wk = sh.worksheet('Заявки Квиз c продажами')
 g_clop=sheet_ready(sales)
 wk.update('A1',g_clop)
