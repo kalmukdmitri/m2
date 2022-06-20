@@ -42,7 +42,7 @@ try:
 
     def max_sintise(str_raw):
         if type(str_raw) == str:
-            legal = """АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнРрОоПпСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-:;., !:«»"""
+            legal = """АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнРрОоПпСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY/Z!"#$%&\'()*+,-:;., !:«»"""
             str_raw = "".join([i for i in str_raw if i in legal])
         else:
             str_raw = str_raw
