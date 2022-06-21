@@ -167,7 +167,6 @@ extract(date from date_time) as date ,caller, sale_state ,MAX(sold_sum) as sold_
 FROM `m2-main.sheets.NB_ALL_CALLS`
 group by 1,2,3
 )
-
 SELECT 
 QUIZ.date as date,
     PHONE,
@@ -181,12 +180,13 @@ QUIZ.date as date,
     utm_source,
     utm_medium,
     utm_campaign,
-    sale_state,
-    sold_sum
+    MAX(sale_state) as sale_state,
+    MAX(sold_sum) as sold_sum
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
-AND QUIZ.date_lead = CALLS.date
+AND QUIZ.date_lead >= CALLS.date
 WHERE sale_state = "Продан"
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 ORDER BY 1 asc
 """ 
 sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
