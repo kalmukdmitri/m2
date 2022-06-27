@@ -184,7 +184,7 @@ QUIZ.date as date,
     MAX(sold_sum) as sold_sum
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
-AND QUIZ.date_lead >= CALLS.date
+AND QUIZ.date_lead <= CALLS.date
 WHERE sale_state = "Продан"
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 ORDER BY 1 asc
