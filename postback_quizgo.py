@@ -49,16 +49,19 @@ group by 1,2,3
 
 SELECT 
     ID,
-    utm_campaign,
-    sale_state,
-    quiz_source
+    max(utm_campaign) as utm_campaign,
+    max(sale_state) as sale_state,
+    min(quiz_source) as quiz_source,
+    min(date_lead) as date_lead
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
-AND QUIZ.date_lead = CALLS.date
+AND QUIZ.date_lead <= CALLS.date
 WHERE quiz_source = "QUIZGO"
+GROUP BY 1
 """ 
 leads_all_doc = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-sales_ids = leads_all_doc[leads_all_doc['utm_campaign'].apply(lambda x : type(x) == str and '%7C' in x)]
+# sales_ids = leads_all_doc[leads_all_doc['utm_campaign'].apply(lambda x : type(x) == str and '%7C' in x)]
+sales_ids = leads_all_doc[leads_all_doc.date_lead.dt.date >= datetime.date(2022,6,10)]
 sales_ids['click_id'] = sales_ids['utm_campaign'].apply(lambda x :  x.split('%7C')[0])
 sales_ids = sales_ids.drop(columns = 'utm_campaign')
 
