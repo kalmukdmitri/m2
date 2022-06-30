@@ -113,11 +113,11 @@ tables = [
                              {'expression': 'ga:users'}
                              ],
                 'filters': ''}},
-    {'name': 'UA_REPORTS.USERS',
-     'funcs' : all_users_transform,
-     'date_partition' : 'date',
+    {'name': 'UA_REPORTS.USERS_DT',
+     'funcs' : all_event_transform,
+     'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
-                             {'name': 'ga:date'},
+                             {'name': 'ga:dateHourMinute'},
                              {'name': 'ga:dimension1'},
                              {'name': 'ga:dimension2'},
                              {'name': 'ga:dimension3'}
