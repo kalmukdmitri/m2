@@ -68,14 +68,15 @@ while start < datetime.datetime.today().date():
         print(dates_couples)
         
         params =  {'dimetions': [
-                                 {'name': 'ga:dateHourMinute'},
-                                 {'name': 'ga:dimension1'},
-                                 {'name': 'ga:dimension2'},
-                                 {'name': 'ga:dimension3'}
-                                 ],
-                    'metrics':   [
-                                 {'expression': 'ga:users'}
-                                 ]}
+                             {'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:dimension1'},
+                             {'name': 'ga:dimension2'},
+                             {'name': 'ga:dimension3'}
+                             ],
+                'metrics':   [
+                             {'expression': 'ga:users'}
+                             ],
+                'filters': ''}
         all_traf_new = ga_conc.report_pd(dates_couples,params)
                    
         all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
