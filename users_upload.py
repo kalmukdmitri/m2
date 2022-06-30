@@ -10,6 +10,7 @@ import pandas
 import time
 import pandas_gbq
 import re
+import sys
 
 def date_pairs(date1, date2, step= 1):
     pairs= []
@@ -78,11 +79,12 @@ while start < datetime.datetime.today().date():
         all_traf_new = ga_conc.report_pd(dates_couples,params)
                    
         all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
-
+        all_traf_new = all_traf_new.drop(columns = ['users'])
         all_traf_new.to_gbq(f'UA_REPORTS.USERS_DT', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         
         start += datetime.timedelta(days=1)
         time.sleep(10)
     except:
+        print(str(sys.exc_info()[1]))
         time.sleep(30)
         start += datetime.timedelta(days=1)
