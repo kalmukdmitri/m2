@@ -64,6 +64,8 @@ def all_traffic_transform(all_traf_new):
     return all_traf_new
 
 def all_users_transform(all_traf_new):
+    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    all_traf_new = all_traf_new.drop(columns = ['users'])
     
     return all_traf_new
 
@@ -114,7 +116,7 @@ tables = [
                              ],
                 'filters': ''}},
     {'name': 'UA_REPORTS.USERS_DT',
-     'funcs' : all_event_transform,
+     'funcs' : all_users_transform,
      'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
