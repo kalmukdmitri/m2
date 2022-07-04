@@ -75,6 +75,11 @@ def all_event_transform(all_traf_new):
     
     return all_traf_new
 
+def all_users_legasy(all_traf_new):
+    
+    
+    return all_traf_new
+
 def all_session_time(all_traf_new):
     
     all_traf_new['bounces'] = all_traf_new['bounces'].astype(int)
@@ -120,6 +125,19 @@ tables = [
      'date_partition' : 'dateHourMinute',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:dimension1'},
+                             {'name': 'ga:dimension2'},
+                             {'name': 'ga:dimension3'}
+                             ],
+                'metrics':   [
+                             {'expression': 'ga:users'}
+                             ],
+                'filters': ''}},
+     {'name': 'UA_REPORTS.USERS',
+     'funcs' : all_users_legasy,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                             {'name': 'ga:date'},
                              {'name': 'ga:dimension1'},
                              {'name': 'ga:dimension2'},
                              {'name': 'ga:dimension3'}
