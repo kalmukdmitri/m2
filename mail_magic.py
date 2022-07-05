@@ -143,10 +143,11 @@ wk.update('A1',g_clop)
 q = """
 WITH
   QUIZ AS (
-  SELECT
+SELECT * FROM 
+(SELECT
     subject,
-date AS datetime,
-extract(date from date) as date_lead,
+    date AS datetime,
+    extract(date from date) as date_lead,
     date,
     PHONE,
     ID,
@@ -158,9 +159,11 @@ extract(date from date) as date_lead,
     quiz_source,
     utm_source,
     utm_medium,
-    utm_campaign
+    utm_campaign,
+    ROW_NUMBER() OVER (PARTITION BY PHONE ORDER BY date ASC) as first,
   FROM
-    `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA` ), 
+    `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA`)
+  WHERE first = 1 ), 
 CALLS AS (
   SELECT
 extract(date from date_time) as date ,caller, sale_state ,MAX(sold_sum) as sold_sum 
