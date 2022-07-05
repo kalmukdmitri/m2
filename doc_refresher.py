@@ -56,7 +56,7 @@ def get_tabel_OPG(month):
     return full_res
 
 res_list = []
-month_list = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь"]
+month_list = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",  "Июль"]
 for i in month_list:
     res_list.append(get_tabel_OPG(i))
 final = pandas.concat(res_list)
