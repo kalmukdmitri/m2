@@ -199,3 +199,47 @@ sh = gc.open_by_key("1bvHgVst-i1-xRu6xAnAo8t2xKpV_9Fkmm_j__T2nqhU")
 wk = sh.worksheet('Заявки Квиз c продажами')
 g_clop=sheet_ready(sales)
 wk.update('A1',g_clop)
+
+
+q = """
+SELECT * FROM `m2-main.EXTERNAL_DATA_SOURCES.VK_LEADS`
+""" 
+sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+sales['answers'] = sales['answers'].apply(parse_json_answers)
+
+quest_cols = []
+for i in sales['answers']:
+    quest_cols.extend([list(i.keys()) for i in sales['answers']][0])
+quest_cols = list(set(quest_cols))
+needed_cols = ['lead_id','form_name','answers','timestamp']
+drop_cols = [i for i in sales.columns if i not in needed_cols]
+sales = sales.drop(columns = drop_cols)
+
+end_list = []
+for row in sales.iterrows():
+    row = row[1]
+    end_cols = list(sales.columns)
+    end_cols.extend(quest_cols)
+    end_dict = {i:'' for i in end_cols}
+    
+    for i in list(row.index):
+        end_dict[i] = row[i]
+    end_list.append(end_dict)
+    
+    for i in quest_cols:
+        end_dict[i] = row.answers[i]['answer'] if i in row.answers else ''
+        
+vk_df = pandas.DataFrame(end_list).drop(columns = 'answers')
+first_columns = ['lead_id', 'form_name', 'first_name', 'phone_number','timestamp']
+rest_columns = [i for i in vk_df.columns if i not in first_columns]
+new_index = first_columns + rest_columns
+vk_df = vk_df.reindex(columns = new_index)
+vk_df['timestamp'] = vk_df['timestamp'].apply(lambda x: str(datetime.datetime.fromtimestamp(float(x)))[:-7] if x else '-' )
+vk_df['phone_number'] = vk_df['phone_number'].apply(lambda x: ''.join([i for i in x if i in '1234567890']))
+vk_df.to_gbq(f'EXTERNAL_DATA_SOURCES.VK_CLEAN_DATA', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+vk_df = vk_df.sort_values('timestamp').reset_index(drop=True)
+vk_df_new = vk_df[vk_df['timestamp'] != '-']
+sh = gc.open_by_key("1bvHgVst-i1-xRu6xAnAo8t2xKpV_9Fkmm_j__T2nqhU")
+wk = sh.worksheet('Лиды ВК')
+g_clop=sheet_ready(vk_df_new)
+wk.update('A1',g_clop)
