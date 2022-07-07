@@ -97,6 +97,8 @@ def decodes(s):
         s2 = urllib.parse.unquote(s2)
     return s2
 
+
+
 mail_raw_pd['dict'] = mail_raw_pd['body'].apply(parse_body)
 mail_raw_pd['PHONE'] = mail_raw_pd['dict'].apply(lambda x: x['Телефон'])
 mail_raw_pd['ID'] =  mail_raw_pd['dict'].apply(lambda x: x['ID'])
@@ -131,6 +133,11 @@ def sheet_ready(df_r):
         ls=list(i)[1:]
         rows.append(ls)
     return rows
+
+def parse_json_answers(answers):
+    ans = json.loads(answers.replace("\'", "\""))
+    ans = {i['key']:i for i in ans}
+    return ans
 
 clean_mail.to_gbq(f'EXTERNAL_DATA_SOURCES.MAIL_DATA', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
