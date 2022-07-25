@@ -243,6 +243,7 @@ new_index = first_columns + rest_columns
 vk_df = vk_df.reindex(columns = new_index)
 vk_df['timestamp'] = vk_df['timestamp'].apply(lambda x: str(datetime.datetime.fromtimestamp(float(x)))[:-7] if x else '-' )
 vk_df['phone_number'] = vk_df['phone_number'].apply(lambda x: ''.join([i for i in x if i in '1234567890']))
+vk_df['phone_number'] = vk_df['phone_number'].apply(lambda x: '79'+x[2:]  if x[:2]=='89' else x )
 vk_df.to_gbq(f'EXTERNAL_DATA_SOURCES.VK_CLEAN_DATA', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 vk_df = vk_df.sort_values('timestamp').reset_index(drop=True)
 vk_df_new = vk_df[vk_df['timestamp'] != '-']
