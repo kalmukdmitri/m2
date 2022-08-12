@@ -84,6 +84,7 @@ new_rows = get_calls(start_date,end_date)
 new_rows['date'] = new_rows['date_time_msk'].apply(lambda x: x.date())
 if len(new_rows) > 0 :
     
+    print(len(new_rows))
     res  = clk.get_query_results(
         f"""
         ALTER TABLE kalmukds.CALLTOUCH_JOURNAL DELETE WHERE date >= '{start_date}'
