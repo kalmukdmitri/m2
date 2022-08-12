@@ -28,6 +28,7 @@ tokem = keys['tokem']
 mod_id = keys['id']
 cabinet = keys['cabinet']
 
+
 def get_calls(start,end):
     start = start.strftime('%d/%m/%Y')
     end = end.strftime('%d/%m/%Y')
@@ -77,7 +78,7 @@ SELECT MAX(date) as l_dt FROM kalmukds.CALLTOUCH_JOURNAL
 '''
 last_date_ct = clk.get_query_results(q)['l_dt'][0]
 start_date = last_date_ct - datetime.timedelta(days=2)
-end_date   = datetime.datetime.today().date() - datetime-.timedelta(days=1)
+end_date   = datetime.datetime.today().date() - datetime.timedelta(days=1)
 
 new_rows = get_calls(start_date,end_date)
 new_rows['date'] = new_rows['date_time_msk'].apply(lambda x: x.date())
