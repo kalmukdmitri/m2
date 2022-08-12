@@ -81,8 +81,8 @@ q  = '''
 SELECT MAX(date_time_msk) as l_dt FROM kalmukds.CALLTOUCH_JOURNAL
 '''
 last_date_ct = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-start_date = last_date_ct['l_dt'][0].date()-datetime.timedelta(days=2)
-end_date = datetime.datetime.today().date()-datetime.timedelta(days=1)
+start_date = last_date_ct['l_dt'][0].date() - datetime.timedelta(days=2)
+end_date = datetime.datetime.today().date() - datetime.timedelta(days=1)
 
 new_rows = get_calls(start_date,end_date)
 new_rows['date'] = new_rows['date_time_msk'].apply(lambda x: x.date())
