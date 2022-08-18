@@ -6,7 +6,6 @@ from googleapiclient.discovery import build
 from clickhouse_driver import Client
 from numpy import dtype
 from oauth2client.service_account import ServiceAccountCredentials
-import bigquery_logger
 import csv
 import datetime
 import gspread
