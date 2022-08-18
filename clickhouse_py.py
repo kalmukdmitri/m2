@@ -49,27 +49,37 @@ class clickhouse_pandas:
     
     
     def create_table_query(self, df, table_name, partition = 'date'):
+        for col in df:
+            if type(df[col][0]) == numpy.bool_:
+                df[col] =  df[col].apply(lambda x: 1 if x else 0)
+                
+            if type(df[col][0]) == datetime.date:
+                df[col] = df[col].astype('<M8[ns]')
+        
         dict_types = {
             dtype('O'): 'Nullable(String)',
             dtype('uint64'): 'Nullable(UInt64)',
             dtype('uint32'): 'Nullable(UInt32)',
             dtype('uint16'): 'Nullable(UInt16)',
-            dtype('bool'): 'Nullable(String)',
+            dtype('bool'): 'Int8',
             dtype('uint8'): 'Nullable(UInt8)',
             dtype('float64'): 'Nullable(Float64)',
             dtype('float32'): 'Nullable(Float32)',
             dtype('int64'): 'Nullable(Int64)',
             dtype('int32'): 'Nullable(Int32)',
             dtype('int16'): 'Nullable(Int16)',
-            dtype('int8'): 'Nullable(Int8)',
+            dtype('int8'):  'Nullable(Int8)',
             dtype('<M8[D]'): 'Date',
+            datetime.date : 'Date',
             dtype('<M8[ns]'): 'DateTime'
         }
 
         query = f"CREATE TABLE IF NOT EXISTS {table_name}\n"
+        
 
         cols  ='('
         df_columns = [[list(df.columns)[i],list(df.dtypes)[i]] for i in range(len(list(df.dtypes)))]
+        print(df_columns)
         for df_col in df_columns:
             if df_col[0] in ("date","Date"):
                 cols += df_col[0] + f' Date\n,'
@@ -80,19 +90,28 @@ class clickhouse_pandas:
 Engine = MergeTree 
 PARTITION BY {partition} ORDER BY {partition}'''
         
-        creation_results = self.client.execute(query+cols[:-2]+end_part)
+        query = query+cols[:-2]+end_part
+        print(query)
+        creation_results = self.client.execute(query)
         return creation_results
     
-    def insert(self, df, table_name, step=500):
+    def insert(self, df, table_name, step=20000, logging = False):
         report_lenth = len(df)
         counter = 0
+        operation_started = datetime.datetime.now()
         
-        for i in df:
-            if type(df[i][0]) == numpy.bool_:
-                df[i] =  df[i].astype(str)
+        for col in df:
+            if type(df[col][0]) == numpy.bool_:
+                df[col] =  df[col].apply(lambda x: 1 if x else 0)
+                
+            if type(df[col][0]) == datetime.date:
+                df[col] = df[col].astype('<M8[ns]')
         
         for i in range(0,report_lenth,step):
-
+            print('Rows Left ' + str(report_lenth-counter))
+            print('Operations left ' + str(int((report_lenth-counter)/step)))
+            print('Time elapsed '+str(datetime.datetime.now() - operation_started))
+            
             if report_lenth <= counter+step:
                 start = counter
                 end = report_lenth
@@ -108,7 +127,7 @@ PARTITION BY {partition} ORDER BY {partition}'''
             
             res = self.client.execute( f'INSERT INTO {table_name} {tuple(df.columns)} VALUES'.replace("'",''),
             inset_list)
-            
+            print(f'INSERT INTO {table_name} {tuple(df.columns)} VALUES'.replace("'",''))
             counter+=step
         
         return res
@@ -119,10 +138,87 @@ PARTITION BY {partition} ORDER BY {partition}'''
         return res1, res
     
     def get_full_table(self, table_name):
-        q = f'SELECT * FROM webapp.{table_name}'
+        q = f'SELECT * FROM {table_name}'
         result, columns = self.client.execute(q, with_column_types = True)
         return pandas.DataFrame(result,columns=[i[0] for i in columns])
+    
     def get_query_results(self, query):
         q = query
         result, columns = self.client.execute(q, with_column_types = True)
         return pandas.DataFrame(result,columns=[i[0] for i in columns])
+
+    
+class clickhouse_logger:
+    
+    def __init__(self, table_name):
+        self.clk  = clickhouse_pandas('webapp')
+        self.table_name = table_name 
+        self.started = datetime.datetime.today()
+        self.file_name = sys.argv[0] 
+        self.comment = '' 
+        self.errors = ''
+        self.rows_recieved = 0 
+        self.rows_updated = 0 
+        self.data_start =  datetime.datetime.today().date()
+        self.data_end =  datetime.datetime.today().date()
+        
+        
+    def add_rows_recieved(self,rows_recieved):
+        self.rows_recieved = rows_recieved
+        
+    def add_rows_updated(self,rows_updated):
+        self.rows_updated = rows_updated
+        
+    def comment_add(self,comment_text):
+        self.comment = comment_text
+        
+    def add_data_start(self,data_start):
+        self.data_start = data_start
+        
+    def add_data_end(self,data_end):
+        self.data_end = data_end
+        
+        
+    def pandify(self):
+        
+        self.ended = datetime.datetime.today()
+        columns = [ 
+                    'date',
+                    'table_name',
+                    'file_name',
+                    'started' ,
+                    'ended',
+                    'data_end',
+                    'rows_recieved',
+                    'rows_updated',
+                    'errors',
+                    'comment'
+                  ]
+        
+        vals = [[self.data_start,
+                 self.table_name, 
+                 self.file_name,
+                 self.started,
+                 self.ended,  
+                 self.data_end,
+                 self.rows_recieved, 
+                 self.rows_updated, 
+                 self.errors, 
+                 self.comment
+                ]]
+        self.log_pd = pandas.DataFrame(vals,columns= columns)
+        return self.log_pd
+    
+    def errors_found(self, errors_text):
+        
+        self.errors = errors_text
+        self.bq_save_log()
+        
+    def no_errors_found(self):
+  
+        self.errors = "no errors"
+        self.bq_save_log()
+        
+    def bq_save_log(self):
+        loggs = self.pandify()
+        self.clk.insert(loggs, 'webapp.loggs')
