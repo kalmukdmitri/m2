@@ -8,7 +8,6 @@ from numpy import dtype
 from oauth2client.service_account import ServiceAccountCredentials
 import csv
 import datetime
-import gspread
 import json
 import numpy
 import os
