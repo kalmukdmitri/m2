@@ -12,7 +12,6 @@ import json
 import numpy
 import os
 import pandas
-import pandas_gbq
 import requests
 import string
 import sys
