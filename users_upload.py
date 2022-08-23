@@ -17,6 +17,7 @@ import string
 import sys
 import pandas_gbq
 import re
+import time
 
 
 def date_pairs(date1, date2, step= 1):
