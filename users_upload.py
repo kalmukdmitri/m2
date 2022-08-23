@@ -1,16 +1,23 @@
-from ga_connector import ga_connect
+from clickhouse_py  import clickhouse_pandas, clickhouse_logger
+from datetime import datetime
+from ga_connector_click import ga_connect
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from clickhouse_driver import Client
+from numpy import dtype
 from oauth2client.service_account import ServiceAccountCredentials
+import csv
 import datetime
-import gspread
 import json
+import numpy
 import os
 import pandas
-import time
+import requests
+import string
+import sys
 import pandas_gbq
 import re
-import sys
+
 
 def date_pairs(date1, date2, step= 1):
     pairs= []
@@ -22,39 +29,16 @@ def date_pairs(date1, date2, step= 1):
     pairs.reverse()
     return pairs
 
-# def decodes(s):
-#     import urllib
-#     s  = s.replace('%25','%')
-#     s2 = urllib.parse.unquote(s)
-#     if '%' in s2:
-#         s2 = s2.replace('25','')
-#         s2 = urllib.parse.unquote(s2)
-#     return s2
-
-# def unix_preprocessing(date):
-#     if ":" in date:
-#         text = date.lower()
-#         text = re.sub('[a-zA-Z]+', ' ', text)
-#         text = re.sub('\+[0-9]+', ' ', text)
-#         text = re.sub('\.[0-9]+', ' ', text)
-#         text = re.sub('\ :[0-9]+', ' ', text)
-#         text = re.sub('\ -[0-9]+', ' ', text)
-#         text = re.sub('\ :[0-9]+', '', text)
-#         return text.strip()        
-#     else:
-#         unix_timestamp = float(date)
-#         a = (datetime.datetime.utcfromtimestamp(unix_timestamp).strftime('%Y-%m-%d %H:%M:%S'))
-#     return a 
-
-# key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
-
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
-q = """SELECT MAX(dateHourMinute) as date FROM `m2-main.UA_REPORTS.USERS_DT`"""
+q = """SELECT MAX(date) as date FROM `m2-main.UA_REPORTS.USERS_FULLER`"""
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+
+# start = datetime.date(2021, 1, 1)
 
 ga_conc = ga_connect('208464364')
 tries = 200
@@ -68,10 +52,8 @@ while start < datetime.datetime.today().date():
         print(dates_couples)
         
         params =  {'dimetions': [
-                             {'name': 'ga:dateHourMinute'},
                              {'name': 'ga:dimension1'},
                              {'name': 'ga:dimension2'},
-                             {'name': 'ga:dimension3'}
                              ],
                 'metrics':   [
                              {'expression': 'ga:users'}
@@ -79,9 +61,11 @@ while start < datetime.datetime.today().date():
                 'filters': ''}
         all_traf_new = ga_conc.report_pd(dates_couples,params)
                    
-        all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
         all_traf_new = all_traf_new.drop(columns = ['users'])
-        all_traf_new.to_gbq(f'UA_REPORTS.USERS_DT', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        all_traf_new['date'] = len(all_traf_new) * [start]
+        all_traf_new['date'] = all_traf_new['date'].apply(lambda x: pandas.Timestamp(x))        
+        
+        all_traf_new.to_gbq(f'UA_REPORTS.USERS_FULLER', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         
         start += datetime.timedelta(days=1)
         time.sleep(10)
