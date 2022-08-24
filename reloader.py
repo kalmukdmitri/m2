@@ -1,4 +1,5 @@
 from google.oauth2 import service_account
+from clickhouse_py  import clickhouse_pandas, clickhouse_logger
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 import datetime
