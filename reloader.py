@@ -49,7 +49,11 @@ for table in tables:
         print(q)
 
         q = f"""SELECT * FROM `m2-main.UA_REPORTS.{table}`
-        where date(dateHourMinute) = '{last_date_ct}' """
+        where date(dateHourMinute) >= '{last_date_ct}' and
+        date(dateHourMinute) < DATE_ADD(DATE '{last_date_ct}', INTERVAL 5 DAY)
+        
+        
+        """
         
         data = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
         data['date'] = data['dateHourMinute'].apply(lambda x : x.date())
