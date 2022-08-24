@@ -1,4 +1,3 @@
-from ga_connector import ga_connect
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
