@@ -34,7 +34,7 @@ key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
 
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
-q = """SELECT MAX(date) as date FROM `m2-main.UA_REPORTS.USERS_FULLER`"""
+q = """SELECT MAX(date) as date FROM `m2-main.UA_REPORTS.USERS_V2`"""
 last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
@@ -53,7 +53,7 @@ while start < datetime.datetime.today().date():
         print(dates_couples)
         
         params =  {'dimetions': [
-                             {'name': 'ga:dimension1'},
+                             {'name': 'ga:dimension4'},
                              {'name': 'ga:dimension2'},
                              ],
                 'metrics':   [
@@ -66,7 +66,7 @@ while start < datetime.datetime.today().date():
         all_traf_new['date'] = len(all_traf_new) * [start]
         all_traf_new['date'] = all_traf_new['date'].apply(lambda x: pandas.Timestamp(x))        
         
-        all_traf_new.to_gbq(f'UA_REPORTS.USERS_FULLER', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+        all_traf_new.to_gbq(f'UA_REPORTS.USERS_V2', project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
         
         start += datetime.timedelta(days=1)
         time.sleep(10)
