@@ -32,7 +32,9 @@ for table in tables:
     date += datetime.timedelta(days=1)
     print(date)
     print(table)
-    while date  < (datetime.datetime.today().date() - datetime.timedelta(days=1)):
+    cut_off = (datetime.datetime.today().date() - datetime.timedelta(days=11))
+    print(cut_off)
+    while date  < cut_off:
         q  = f'''
         SELECT MAX(date) as l_dt FROM ga.{table}
         where date < '2022-08-15'
