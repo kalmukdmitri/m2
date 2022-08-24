@@ -32,7 +32,7 @@ for table in tables:
     date += datetime.timedelta(days=1)
     print(date)
     print(table)
-    while date < datetime.date(2022, 8, 15):
+    while date  < (datetime.datetime.today().date() - datetime.timedelta(days=1)):
         q  = f'''
         SELECT MAX(date) as l_dt FROM ga.{table}
         where date < '2022-08-15'
@@ -45,15 +45,15 @@ for table in tables:
         
         else:
             last_date_ct+= datetime.timedelta(days=1)
-        print(last_date_ct)
-        print(q)
+        date = last_date_ct
+        print(date)
+        
 
         q = f"""SELECT * FROM `m2-main.UA_REPORTS.{table}`
         where date(dateHourMinute) >= '{last_date_ct}' and
-        date(dateHourMinute) < DATE_ADD(DATE '{last_date_ct}', INTERVAL 5 DAY)
-        
-        
+        date(dateHourMinute) < DATE_ADD(DATE '{last_date_ct}', INTERVAL 10 DAY)
         """
+        print(q)
         
         data = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
         data['date'] = data['dateHourMinute'].apply(lambda x : x.date())
