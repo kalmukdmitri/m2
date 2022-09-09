@@ -17,7 +17,7 @@ from collections import OrderedDict
 class clickhouse_pandas:
     #   Задаём ключ из файла
     key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
-    key_path_extra = '/home/kalmukds/other_keys.json'
+    key_path_extra = '/home/kalmukds/other_keys_new.json'
 #     key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 #     key_path_extra = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\other_keys.json'
     f = open(key_path_extra, "r")
