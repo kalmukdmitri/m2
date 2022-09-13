@@ -202,57 +202,43 @@ tables = [
 ga_conc = ga_connect('208464364')
 
 
+# работало
+
 logger_all = clickhouse_logger('UA_REPORTS - ALL_TABLES')
 ROWS_ALL_UPDATED = 0
-try:
-    
-    for table in tables:
-        
-        logger_table = clickhouse_logger(table['name'])
-        
-        try:
-            start = get_start_date(table)
 
-            end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
+for table in tables:
 
-            dates_couples = date_pairs(start, end)
+    logger_table = clickhouse_logger(table['name'])
 
-            # Логируем отчётные периоды отчёты
-            logger_table.add_data_start(start)
-            logger_table.add_data_end(end)
 
-            params = table['params']
-            
-            for dates in dates_couples:
-                
-                dates_couple_1 = [dates]
+    start = get_start_date(table)
 
-                UA_report = ga_conc.report_pd(dates_couple_1,params)
+    end =  datetime.datetime.today().date() - datetime.timedelta(days=1)
 
-                logger_table.add_rows_recieved(len(UA_report))
+    dates_couples = date_pairs(start, end)
 
-                UA_report_click = table['funcs'](UA_report)
+    # Логируем отчётные периоды отчёты
+    logger_table.add_data_start(start)
+    logger_table.add_data_end(end)
 
-    #             # Записываем полученные данные
+    params = table['params']
 
-                clk  = clickhouse_pandas('ga')
-                clk.insert(UA_report_click, table['name'])
-                
-                UA_report_bq = table['funcs_bq'](UA_report)
-                UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
-            
-            # Логируем полученые данные
+    for dates in dates_couples:
 
-            logger_table.add_rows_updated(len(UA_report))
-            ROWS_ALL_UPDATED += len(UA_report)
+        dates_couple_1 = [dates]
 
-            logger_table.no_errors_found()
-        except:
-            logger_table.errors_found(str(sys.exc_info()[1]))
-            
-    logger_all.add_rows_updated(ROWS_ALL_UPDATED)
-    logger_all.no_errors_found()
-    
-except:
-    
-    logger_all.errors_found(str(sys.exc_info()[1]))
+        UA_report = ga_conc.report_pd(dates_couple_1,params)
+
+        logger_table.add_rows_recieved(len(UA_report))
+
+        UA_report_click = table['funcs'](UA_report)
+
+#             # Записываем полученные данные
+
+        clk  = clickhouse_pandas('ga')
+        clk.insert(UA_report_click, table['name'])
+
+        UA_report_bq = table['funcs_bq'](UA_report)
+        UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+
