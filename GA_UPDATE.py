@@ -15,19 +15,26 @@ import pandas
 import requests
 import string
 import sys
+import urllib
 
+# key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
+key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
+gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
 # DATAFRAME TRANSFORM
 def decodes(s):
-    import urllib
+    
+    
     s  = s.replace('%25','%')
     s2 = urllib.parse.unquote(s)
     if '%' in s2:
         s2 = s2.replace('25','')
         s2 = urllib.parse.unquote(s2)
+        
     return s2
 
 def date_pairs(date1, date2, step= 1):
+    
     pairs= []
     while date2 >= date1:
         prev_date = date2 - datetime.timedelta(days=step-1) if date2 - datetime.timedelta(days=step) >= date1 else date1
@@ -35,15 +42,17 @@ def date_pairs(date1, date2, step= 1):
         date2 -= datetime.timedelta(days=step)
         pairs.append(pair)
     pairs.reverse()
+    
     return pairs
 
 def get_start_date(table):
+    
     clk  = clickhouse_pandas('ga')
 
     q = f"""SELECT  MAX(date) as date FROM {table['name']}"""
-#     print(q)
     last_dt = clk.get_query_results(q)
     start = last_dt['date'][0] + datetime.timedelta(days=1)
+    
     return start
 
 
@@ -55,9 +64,11 @@ def all_traffic_transform(all_traf_new):
     all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
     all_traf_new['date'] = all_traf_new['dateHourMinute'].apply(lambda x : x.date())
+    
     return all_traf_new
 
 def all_users_transform(all_traf_new):
+    
     all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     all_traf_new['date'] = all_traf_new['dateHourMinute'].apply(lambda x : x.date())
     all_traf_new = all_traf_new.drop(columns = ['users'])
@@ -93,9 +104,34 @@ def all_users_plus(all_traf_new):
     
     return all_traf_new
 
+def all_traffic_transform_bq(all_traf_new):
+    
+    all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
+    all_traf_new['medium'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[1])
+    all_traf_new = all_traf_new.drop(columns = ['sourcemedium', 'users'])
+    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    all_traf_new['keyword'] = all_traf_new['keyword'].apply(decodes)
+    
+    return all_traf_new
+
+def all_users_transform_bq(all_traf_new):
+    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    all_traf_new = all_traf_new.drop(columns = ['users'])
+    
+    return all_traf_new
+
+def all_event_transform_bq(all_traf_new):
+    
+    all_traf_new['dateHourMinute'] = all_traf_new['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
+    
+    return all_traf_new
+
 tables = [
-    {'name': 'ga.UA_TRAFIC_BIG',
+    {
+     'name': 'ga.UA_TRAFIC_BIG',
+     'bq_name': 'UA_REPORTS.UA_TRAFIC_BIG',
      'funcs' : all_traffic_transform,
+     'funcs_bq' : all_traffic_transform_bq,
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -113,7 +149,9 @@ tables = [
                              ],
                 'filters': ''}},
     {'name': 'ga.USERS_DT',
+     'bq_name': 'UA_REPORTS.USERS_DT',
      'funcs' : all_users_transform,
+     'funcs_bq' : all_users_transform_bq,
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -127,7 +165,9 @@ tables = [
                 'filters': ''}},
     
     {'name': 'ga.RAW_EVENTS',
+     'bq_name': 'UA_REPORTS.RAW_EVENTS',
      'funcs' : all_event_transform,
+     'funcs_bq' : all_event_transform_bq,
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -145,7 +185,9 @@ tables = [
                 'filters': 'ga:eventlabel!~View|^(Show)$'}},
     
     {'name': 'ga.PAGE_VIEWS',
+     'bq_name': 'UA_REPORTS.PAGE_VIEWS',
      'funcs' : all_event_transform,
+     'funcs_bq' : all_event_transform_bq,
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
@@ -180,17 +222,24 @@ try:
             logger_table.add_data_end(end)
 
             params = table['params']
-
-            UA_report = ga_conc.report_pd(dates_couples,params)
-
-            logger_table.add_rows_recieved(len(UA_report))
-
-            UA_report = table['funcs'](UA_report)
             
-#             # Записываем полученные данные
-            
-            clk  = clickhouse_pandas('ga')
-            clk.insert(UA_report, table['name'])
+            for dates in dates_couples:
+                
+                dates_couple_1 = [dates]
+
+                UA_report = ga_conc.report_pd(dates_couple_1,params)
+
+                logger_table.add_rows_recieved(len(UA_report))
+
+                UA_report_click = table['funcs'](UA_report)
+
+    #             # Записываем полученные данные
+
+                clk  = clickhouse_pandas('ga')
+                clk.insert(UA_report_click, table['name'])
+                
+                UA_report_bq = table['funcs_bq'](UA_report)
+                UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
             
             # Логируем полученые данные
 
