@@ -229,6 +229,9 @@ for table in tables:
         dates_couple_1 = [dates]
 
         UA_report = ga_conc.report_pd(dates_couple_1,params)
+        
+        UA_BQ = UA_report.copy()
+        UA_CLICK = UA_report.copy()
 
         logger_table.add_rows_recieved(len(UA_report))
 
