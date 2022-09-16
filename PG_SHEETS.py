@@ -4,7 +4,6 @@ from google.oauth2 import service_account
 from oauth2client.service_account import ServiceAccountCredentials
 from sqlalchemy import create_engine
 import base64
-import bigquery_logger
 import datetime
 import gspread
 import json
