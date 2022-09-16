@@ -86,7 +86,7 @@ def NB_CALLS_CLEANUP(calls_g_c):
     calls_g_c = calls_g_c.reset_index(drop=True)
     return calls_g_c
 
-def get_df(query, engine = engine):
+def get_df(query, engine):
     df_check = engine.execute(query)
     df_q = pandas.DataFrame(df_check.fetchall(), columns = df_check.keys())
     engine.dispose()
@@ -111,7 +111,7 @@ gbq_credential = service_account.Credentials.from_service_account_file(key_path,
 q = '''
 SELECT * FROM "MART_AUTH"."REGISTRATIONS" 
 where report_type = 'Зарегистрированный пользователь (установлен пароль)' '''
-regs = get_df(q)
+regs = get_df(q, engine)
 regs['date'] = regs['registration_date'] 
 regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations','report_type' ])
 regs = regs.sort_values(['date']).reset_index(drop=True)
