@@ -97,9 +97,21 @@ PARTITION BY {partition} ORDER BY {partition}'''
         return creation_results
     
     def insert(self, df, table_name, step=20000, logging = False):
+        
         report_lenth = len(df)
         counter = 0
         operation_started = datetime.datetime.now()
+        
+        for col in df:
+            vals = set(df[col])
+            types = {}
+            for val in vals:
+                if val in types:
+                    continue
+                else:
+                    types[type(val)] = True
+            if len(types) > 1 and str in types:
+                df[col] = df[col].astype(str)
         
         for col in df:
             if type(df[col][0]) == numpy.bool_:
@@ -109,6 +121,7 @@ PARTITION BY {partition} ORDER BY {partition}'''
                 df[col] = df[col].astype('<M8[ns]')
         
         for i in range(0,report_lenth,step):
+            
             print('Rows Left ' + str(report_lenth-counter))
             print('Operations left ' + str(int((report_lenth-counter)/step)))
             print('Time elapsed '+str(datetime.datetime.now() - operation_started))
