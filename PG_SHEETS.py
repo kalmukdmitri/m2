@@ -92,12 +92,24 @@ def get_df(query, engine):
     engine.dispose()
     return df_q
 
+def upload_multipart(table_name, df):
+    
+    dates_list = list(set(df['date']))
+    dates_list.sort()
+    
+    for i in range(0,len(dates_list), 10):
+        
+        date_block = dates_list[i:i+10]
+        regs_date = df[df['date'].apply(lambda x: x in date_block)]
+        regs_date = regs_date.reset_index(drop=True)
+        clk.insert(regs_date, table_name)
 
 
 #  PG LOAD
 
 # key_path_extra = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\pg_keys.json'
 key_path_extra = '/home/kalmukds/pg_keys.json'
+
 f = open(key_path_extra, "r")
 key_other = f.read()
 keys = json.loads(key_other)['pg']
@@ -106,7 +118,6 @@ engine = create_engine(keys)
 key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
 # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-
 
 q = '''
 SELECT * FROM "MART_AUTH"."REGISTRATIONS" 
@@ -119,21 +130,17 @@ regs = regs.sort_values(['date']).reset_index(drop=True)
 clk  = clickhouse_pandas('web')
 res  = clk.get_query_results(
     f"""
-    ALTER TABLE web.PG_REGS DELETE  WHERE 1 = 1
+    ALTER TABLE pg.PG_REGS DELETE  WHERE 1 = 1
     """)
 
 regs = regs.sort_values(['date']).reset_index(drop=True)
-dates_list = list(set(regs['date']))
-dates_list.sort()
 
-for date in dates_list:
-    
-    regs_date = regs[regs['date'] == date]
-    regs_date = regs_date.reset_index(drop=True)
-    clk.insert(regs_date, 'web.PG_REGS')
+upload_multipart('pg.PG_REGS', regs)
 
 regs = regs.drop(columns = ['user_email','user_phone'])
+
 regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAYLY_RELOADED', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
 
 # DOWNLOAD
 key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
@@ -169,17 +176,16 @@ calls_g_c = pandas.DataFrame(list_of_dicts)
 IB_CALLS_CLEAN = ib_df_cleanup(IB_CALLS)
 NB_CALLS_CLEAN = NB_CALLS_CLEANUP(calls_g_c)
 
-def upload_multipart(table_name, df):
-    
-    dates_list = list(set(df['date']))
-    dates_list.sort()
+res  = clk.get_query_results(
+    f"""
+    ALTER TABLE google_sheets.IB DELETE WHERE 1=1
+    """)
 
-    for date in dates_list:
-
-        regs_date = df[df['date'] == date]
-        regs_date = regs_date.reset_index(drop=True)
-        clk.insert(regs_date, table_name)
+res  = clk.get_query_results(
+    f"""
+    ALTER TABLE google_sheets.NB DELETE WHERE 1=1
+    """)
 
 # LOAD
-upload_multipart('kalmukds.IB' , IB_CALLS_CLEAN)
-upload_multipart('kalmukds.NB' , NB_CALLS_CLEAN)
+upload_multipart('google_sheets.IB' , IB_CALLS_CLEAN)
+upload_multipart('google_sheets.NB' , NB_CALLS_CLEAN)
