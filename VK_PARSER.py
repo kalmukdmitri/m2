@@ -206,7 +206,7 @@ def upload_multipart(table_name, df):
 clk  = clickhouse_pandas('external')
 res  = clk.get_query_results(
     f"""
-    ALTER TABLE external.VK_ADS WHERE 1=1
+    ALTER TABLE external.VK_ADS DELETE WHERE 1=1 
     """)
 
 upload_multipart('external.VK_ADS' , final_data)
