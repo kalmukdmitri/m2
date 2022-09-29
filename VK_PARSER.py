@@ -4,7 +4,6 @@ import requests
 import json
 import datetime
 import time
-from clickhouse_py  import clickhouse_pandas
 import pandas_gbq
 import requests
 import datetime
@@ -184,6 +183,8 @@ SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
          'https://www.googleapis.com/auth/drive']
 
 final_data.to_gbq(f'ADS_COST.VK_CUSTOM_COSTS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+from clickhouse_py  import clickhouse_pandas
 
 def upload_multipart(table_name, df):
     
