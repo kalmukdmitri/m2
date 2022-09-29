@@ -182,7 +182,12 @@ SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
              'https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
 
-final_data.to_gbq(f'ADS_COST.VK_CUSTOM_COSTS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+from io import StringIO
+temp_csv_string = final_data.to_csv(sep=";", index=False)
+temp_csv_string_IO = StringIO(temp_csv_string)
+# create new dataframe from string variable
+final_data_new = pandas.read_csv(temp_csv_string_IO, sep=";")
+final_data_new.to_gbq(f'ADS_COST.VK_CUSTOM_COSTS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 from clickhouse_py  import clickhouse_pandas
 
