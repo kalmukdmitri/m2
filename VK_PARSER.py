@@ -24,7 +24,6 @@ keys = json.loads(key_other)['token']
 def get_vk(token = '', method = 'ads.getStatistics',client='', params=''):
     user_id_V = f"&user_id=32785745&v=5.131&client_id={client}"
     base_url = f"https://api.vk.com/method/{method}?{token}{user_id_V}&{params}"
-    print(base_url)
     metrica_answer = requests.get(base_url)
     results = json.loads(metrica_answer.text)
     return results
@@ -138,7 +137,7 @@ for client_data in clients:
     ads = pandas.DataFrame(end)
     if len(ads)>0:
         ads_pure = ads[['day','spent', 'impressions', 'clicks', 'reach','lead_form_sends', 'id']]
-        ads_pure=ads_pure.fillna(0)
+        ads_pure=ads_pure.fillna(0.0)
         ints = ['impressions', 'clicks', 'reach','lead_form_sends']
         for col in ints:
             ads_pure[col] = ads_pure[col].astype(int)
