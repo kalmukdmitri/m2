@@ -62,4 +62,11 @@ where report_type = 'По дням'
 group by user_code, role_main, report_date
 '''
 authes = get_df(q, engine)
-authes.to_gbq(f'EXTERNAL_DATA_SOURCES.AUTH_PG', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
+from io import StringIO
+temp_csv_string = authes.to_csv(sep=";", index=False)
+temp_csv_string_IO = StringIO(temp_csv_string)
+# create new dataframe from string variable
+authes_new = pandas.read_csv(temp_csv_string_IO, sep=";")
+
+
+authes_new.to_gbq(f'EXTERNAL_DATA_SOURCES.AUTH_PG', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
