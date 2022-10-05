@@ -97,6 +97,11 @@ def sheet_ready(df_r):
         rows.append(ls)
     return rows
 
+drops = ['user_registration_date',
+'user_name',
+'person_surname']
+load = load.drop(columns = drops)
+
 sh = gc.open_by_key("1hU11cmwMtNC8PfVg9gci7Gg6oaQ5dsHwTCcduLE6hJ4")
 wk = sh.worksheet('Лист1')
 g_clop=sheet_ready(load)
