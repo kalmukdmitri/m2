@@ -197,7 +197,30 @@ tables = [
                 'metrics':   [
                              {'expression': 'ga:pageviews'}
                              ],
-                'filters': ''}}
+                'filters': ''}},
+            {
+     'name': 'ga.RAW_EVENTS_IB_REQUESTS',
+     'bq_name': 'UA_REPORTS.RAW_EVENTS_IB_REQUESTS',
+     'funcs' : all_event_transform,
+     'funcs_bq' : all_event_transform_bq,
+     'date_partition' : 'dateHourMinute',
+     'params': {'dimetions': [
+                             {'name': 'ga:dateHourMinute'},
+                             {'name': 'ga:dimension4'},
+                             {'name': 'ga:dimension2'},
+                             {'name': 'ga:dimension3'},
+                             {'name': 'ga:pagepath'},
+                             {'name': 'ga:eventlabel'},            
+                             {'name': 'ga:eventAction'},
+                             {'name': 'ga:eventCategory'}
+                             ],
+                'metrics':   [
+                             {'expression': 'ga:users'},
+                             {'expression': 'ga:totalEvents'},
+                             {'expression': 'ga:uniqueEvents'}
+                             ],
+                'filters': 'ga:dimension2!~not_authorized|anonym;ga:eventlabel=~(Cl(Serp|Card)|Zbs)SellMortgageRequestSend|ClCardSellMortgageCallBackSen|NbSerpIBSendBankCallBack|^NbCardIBSend|^claim_completed'}
+    }
 ]
 ga_conc = ga_connect('208464364')
 
