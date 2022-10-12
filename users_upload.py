@@ -39,7 +39,7 @@ last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credentia
 
 start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 
-# start = datetime.date(2021, 1, 1)
+start = datetime.date(2021, 1, 1)
 
 ga_conc = ga_connect('208464364')
 tries = 200
