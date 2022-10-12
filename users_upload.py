@@ -37,7 +37,7 @@ gbq_credential = service_account.Credentials.from_service_account_file(key_path,
 # q = """SELECT MAX(date) as date FROM `m2-main.UA_REPORTS.USERS_V2`"""
 # last_dt = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
-start = last_dt['date'][0].date() + datetime.timedelta(days=1)
+# start = last_dt['date'][0].date() + datetime.timedelta(days=1)
 
 start = datetime.date(2021, 1, 1)
 
