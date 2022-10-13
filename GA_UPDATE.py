@@ -213,8 +213,7 @@ tables = [
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dimension4'},
-                             {'name': 'ga:dimension2'},
-                             {'name': 'ga:pagepath'}
+                             {'name': 'ga:dimension2'}
                              ],
                 'metrics':   [
                              {'expression': 'ga:users'}
