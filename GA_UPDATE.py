@@ -281,10 +281,14 @@ try:
                 
                 if 'ga.SESSION_AUTHES' == table['name']:
                     UA_report['date'] = len(UA_report) * [dates_couple_1[0]]
-                    UA_report['date'] = UA_report['date'].apply(lambda x: pandas.Timestamp(x)) 
+                    UA_report['date'] = UA_report['date'].apply(lambda x: pandas.Timestamp(x))
+                    UA_BQ = UA_report.copy()
+                    UA_CLICK = UA_report.copy()
                 else:
+                    UA_BQ = UA_report.copy()
+                    UA_CLICK = UA_report.copy()
                     UA_report_click = table['funcs'](UA_CLICK)
-                    
+                    UA_report_bq = table['funcs_bq'](UA_BQ)
 
                 # Записываем полученные данные
                 UA_BQ = UA_report.copy()
