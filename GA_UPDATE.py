@@ -276,23 +276,22 @@ try:
                 dates_couple_1 = [dates]
 
                 UA_report = ga_conc.report_pd(dates_couple_1,params)
+                UA_BQ = UA_report.copy()
+                UA_CLICK = UA_report.copy()
 
                 logger_table.add_rows_recieved(len(UA_CLICK))
                 
                 if 'ga.SESSION_AUTHES' == table['name']:
-                    UA_report['date'] = len(UA_report) * [dates_couple_1[0]]
-                    UA_report['date'] = UA_report['date'].apply(lambda x: pandas.Timestamp(x))
-                    UA_BQ = UA_report.copy()
-                    UA_CLICK = UA_report.copy()
+                    UA_BQ['date'] = len(UA_BQ) * [dates_couple_1[0]]
+                    UA_BQ['date'] = UA_BQ['date'].apply(lambda x: pandas.Timestamp(x))
+                    UA_CLICK['date'] = len(UA_CLICK) * [dates_couple_1[0]]
+                    UA_CLICK['date'] = UA_CLICK['date'].apply(lambda x: pandas.Timestamp(x))
+
                 else:
-                    UA_BQ = UA_report.copy()
-                    UA_CLICK = UA_report.copy()
                     UA_report_click = table['funcs'](UA_CLICK)
                     UA_report_bq = table['funcs_bq'](UA_BQ)
 
                 # Записываем полученные данные
-                UA_BQ = UA_report.copy()
-                UA_CLICK = UA_report.copy()
                 
                 clk  = clickhouse_pandas('ga')
                 clk.insert(UA_report_click, table['name'])
