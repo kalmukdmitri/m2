@@ -104,6 +104,13 @@ def all_users_plus(all_traf_new):
     
     return all_traf_new
 
+def all_session(all_traf_new):
+
+    all_traf_new['date']  = all_traf_new['date'].astype(str)
+    all_traf_new['date'] = all_traf_new['date'].apply(lambda x : datetime.datetime.strptime(x,"%Y-%m-%d"))
+    
+    return all_traf_new
+
 def all_traffic_transform_bq(all_traf_new):
     
     all_traf_new['source'] = all_traf_new['sourcemedium'].apply(lambda x : x.split(' / ')[0])
@@ -197,13 +204,29 @@ tables = [
                 'metrics':   [
                              {'expression': 'ga:pageviews'}
                              ],
-                'filters': ''}},
-            {
+                'filters': ''}
+    },
+      {'name': 'ga.SESSION_AUTHES',
+     'bq_name': 'UA_REPORTS.SESSION_AUTHES',
+     'funcs' : all_event_transform,
+     'funcs_bq' : all_event_transform_bq,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                             {'name': 'ga:dimension4'},
+                             {'name': 'ga:dimension2'},
+                             {'name': 'ga:pagepath'}
+                             ],
+                'metrics':   [
+                             {'expression': 'ga:users'}
+                             ],
+                'filters': ''}
+    },    
+    {
      'name': 'ga.RAW_EVENTS_IB_REQUESTS',
      'bq_name': 'UA_REPORTS.RAW_EVENTS_IB_REQUESTS',
      'funcs' : all_event_transform,
      'funcs_bq' : all_event_transform_bq,
-     'date_partition' : 'dateHourMinute',
+     'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dateHourMinute'},
                              {'name': 'ga:dimension4'},
@@ -255,15 +278,19 @@ try:
 
                 UA_report = ga_conc.report_pd(dates_couple_1,params)
 
-                UA_BQ = UA_report.copy()
-                UA_CLICK = UA_report.copy()
-
                 logger_table.add_rows_recieved(len(UA_CLICK))
-
-                UA_report_click = table['funcs'](UA_CLICK)
+                
+                if 'ga.SESSION_AUTHES' == table['name']:
+                    UA_report['date'] = len(UA_report) * [dates_couple_1[0]]
+                    UA_report['date'] = UA_report['date'].apply(lambda x: pandas.Timestamp(x)) 
+                else:
+                    UA_report_click = table['funcs'](UA_CLICK)
+                    
 
                 # Записываем полученные данные
-
+                UA_BQ = UA_report.copy()
+                UA_CLICK = UA_report.copy()
+                
                 clk  = clickhouse_pandas('ga')
                 clk.insert(UA_report_click, table['name'])
 
