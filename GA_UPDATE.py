@@ -282,12 +282,12 @@ try:
                 logger_table.add_rows_recieved(len(UA_CLICK))
                 
                 if 'ga.SESSION_AUTHES' == table['name']:
-                    UA_BQ['date'] = len(UA_BQ) * [dates_couple_1[0]]
-                    UA_BQ['date'] = UA_BQ['date'].apply(lambda x: pandas.Timestamp(x))
-                    UA_CLICK['date'] = len(UA_CLICK) * [dates_couple_1[0]]
-                    UA_CLICK['date'] = UA_CLICK['date'].apply(lambda x: pandas.Timestamp(x))
+
+                    UA_report_click = table['funcs'](UA_CLICK, dates[0])
+                    UA_report_bq = table['funcs_bq'](UA_BQ, dates[0])
 
                 else:
+
                     UA_report_click = table['funcs'](UA_CLICK)
                     UA_report_bq = table['funcs_bq'](UA_BQ)
 
@@ -296,7 +296,6 @@ try:
                 clk  = clickhouse_pandas('ga')
                 clk.insert(UA_report_click, table['name'])
 
-                UA_report_bq = table['funcs_bq'](UA_BQ)
                 UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
                 
             # Логируем полученые данные 
