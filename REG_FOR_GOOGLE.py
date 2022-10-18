@@ -53,6 +53,19 @@ regs['date'] = regs['date'].astype(str)
 regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAYLY_RELOADED', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
 
 q = '''
+SELECT * FROM "MART_AUTH"."REGISTRATIONS"  '''
+regs = get_df(q, engine)
+regs['date'] = regs['registration_date'] 
+regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations','report_type' ])
+regs = regs.sort_values(['date']).reset_index(drop=True)
+regs = regs.drop(columns = ['user_email','user_phone'])
+
+regs = regs.reset_index(drop=True)
+# regs['date'] = regs['date'].astype(str)
+
+regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAILY_REGS_FULL', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
+
+q = '''
 Select
 user_code,
 role_main,
