@@ -56,7 +56,7 @@ q = '''
 SELECT * FROM "MART_AUTH"."REGISTRATIONS"  '''
 regs = get_df(q, engine)
 regs['date'] = regs['registration_date'] 
-regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations','report_type' ])
+regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations' ])
 regs = regs.sort_values(['date']).reset_index(drop=True)
 regs = regs.drop(columns = ['user_email','user_phone'])
 

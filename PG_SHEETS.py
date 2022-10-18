@@ -130,7 +130,7 @@ regs = regs.sort_values(['date']).reset_index(drop=True)
 clk  = clickhouse_pandas('web')
 res  = clk.get_query_results(
     f"""
-    ALTER TABLE pg.PG_REGS DELETE  WHERE 1 = 1
+    ALTER TABLE pg.PG_REGS DELETE WHERE 1 = 1
     """)
 
 regs = regs.sort_values(['date']).reset_index(drop=True)
@@ -139,7 +139,27 @@ upload_multipart('pg.PG_REGS', regs)
 
 regs = regs.drop(columns = ['user_email','user_phone'])
 
-regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAYLY_RELOADED', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+
+q = '''
+SELECT * FROM "MART_AUTH"."REGISTRATIONS" '''
+regs = get_df(q, engine)
+regs['date'] = regs['registration_date'] 
+regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations' ])
+regs = regs.sort_values(['date']).reset_index(drop=True)
+
+clk  = clickhouse_pandas('web')
+res  = clk.get_query_results(
+    f"""
+    ALTER TABLE pg.PG_REGS_FULL DELETE WHERE 1 = 1
+    """)
+
+regs = regs.sort_values(['date']).reset_index(drop=True)
+
+upload_multipart('pg.PG_REGS_FULL', regs)
+
+
+
+# regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAYLY_RELOADED', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 
 # DOWNLOAD
