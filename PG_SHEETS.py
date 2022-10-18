@@ -102,7 +102,7 @@ def upload_multipart(table_name, df):
         date_block = dates_list[i:i+10]
         regs_date = df[df['date'].apply(lambda x: x in date_block)]
         regs_date = regs_date.reset_index(drop=True)
-        clk.creat_table_df(regs_date, table_name)
+        clk.insert(regs_date, table_name)
 
 
 #  PG LOAD
