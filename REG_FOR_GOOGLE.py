@@ -7,6 +7,7 @@ import pandas
 import json
 import pandas_gbq
 import requests
+from io import StringIO
 
 def get_df(query, engine):
     df_check = engine.execute(query)
@@ -60,10 +61,13 @@ regs = regs.drop(columns = ['registration_date','registration_week','registratio
 regs = regs.sort_values(['date']).reset_index(drop=True)
 regs = regs.drop(columns = ['user_email','user_phone'])
 
-regs = regs.reset_index(drop=True)
+regs_full = regs.reset_index(drop=True)
 # regs['date'] = regs['date'].astype(str)
-
-regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAILY_REGS_FULL', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
+temp_csv_string = regs_full.to_csv(sep=";", index=False)
+temp_csv_string_IO = StringIO(temp_csv_string)
+# create new dataframe from string variable
+regs_full_plus = pandas.read_csv(temp_csv_string_IO, sep=";")
+regs_full_plus.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_DAILY_REGS_FULL', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
 
 q = '''
 Select
@@ -75,7 +79,7 @@ where report_type = 'По дням'
 group by user_code, role_main, report_date
 '''
 authes = get_df(q, engine)
-from io import StringIO
+
 temp_csv_string = authes.to_csv(sep=";", index=False)
 temp_csv_string_IO = StringIO(temp_csv_string)
 # create new dataframe from string variable
