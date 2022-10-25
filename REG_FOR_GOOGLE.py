@@ -87,3 +87,10 @@ authes_new = pandas.read_csv(temp_csv_string_IO, sep=";")
 
 
 authes_new.to_gbq(f'EXTERNAL_DATA_SOURCES.AUTH_PG', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
+
+
+q = 'SELECT * FROM "ODS_AUTH_ROLE"."ROLE"'
+regs = get_df(q, engine)
+regs['date'] = regs['tech_load_ts'].apply(lambda x: x.date())
+regs = regs.drop(columns = ['tech_load_ts'])
+regs.to_gbq(f'EXTERNAL_DATA_SOURCES.PG_USERS_CODE_ROLE', project_id='m2-main', chunksize=20000, if_exists='replace', credentials=gbq_credential)
