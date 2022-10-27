@@ -117,14 +117,17 @@ q = 'SELECT MAX(date) as date FROM ga.PAGE_TIME'
 last_dt = clk.get_query_results(q)['date'][0] 
 
 ga_conc = ga_connect('208464364')
-start = str(last_dt + datetime.timedelta(days=1))
+start = last_dt + datetime.timedelta(days=1)
 
 
 tries = 200
 while start < datetime.datetime.today().date():
     
     tries-=1
-    UA_report2 = ga_conc.report_pd([[start,start]], params)
+    q = 'SELECT MAX(date) as date FROM ga.PAGE_TIME'
+    start = clk.get_query_results(q)['date'][0]+ datetime.timedelta(days=1)
+    step = str(start)
+    UA_report2 = ga_conc.report_pd([[step,step]], params)
     UA_report2['dateHourMinute'] = UA_report2['dateHourMinute'].apply(lambda x: datetime.datetime.strptime(x,"%Y%m%d%H%M"))
     UA_report2['date'] = UA_report2['dateHourMinute'].apply(lambda x : x.date())
     clk.insert(UA_report2, 'ga.PAGE_TIME')
