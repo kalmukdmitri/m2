@@ -23,6 +23,14 @@ key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 clk  = clickhouse_pandas('ga')
 
+key_path = '/home/kalmukds/pg_keys_special.json'
+# key_path_pg = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\pg_keys_special.json'
+f = open(key_path_pg, "r")
+key_other = f.read()
+keys = json.loads(key_other)['pg']
+engine = create_engine(keys)
+
+
 q = f"""SELECT * FROM schedules.view_refresh"""
 tables = clk.get_query_results(q)
 for scripts in tables.iterrows():
@@ -49,15 +57,26 @@ def upload_multipart(table_name, df):
         regs_date = df[df['date'].apply(lambda x: x in date_block)]
         regs_date = regs_date.reset_index(drop=True)
         clk.insert(regs_date, table_name)
-
+        
+table_dict = {
+'`EXPORT_CLICK.installs by month`': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
+'`EXPORT_CLICK.web_mau`': '"STG_CLICK_WEBAPP"."WEB_MAU"',
+'`EXPORT_CLICK.installs by date`':'"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
+'`EXPORT_CLICK.app_mau`':'"STG_CLICK_WEBAPP"."APP_MAU"'
+}
 
 for table in tables:
     
+    print(table_dict[table])
+    
     q = f'''SELECT * FROM {table}'''
+    
     table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
     if 'date' not in table_df.columns:
         table_df['date'] = datetime.datetime.now().date()
-    click_name = 'nikitindd.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
-    clear_q = f'ALTER TABLE {click_name} DELETE WHERE 1=1;'
-    clk.get_query_results(clear_q)
+    click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
+    q = f'''
+        TRUNCATE TABLE
+        {table_dict[table]} '''
+    engine.execute(q)
     upload_multipart(click_name,table_df)
