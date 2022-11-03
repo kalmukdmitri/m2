@@ -156,21 +156,13 @@ SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
 credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
 
 gc = gspread.authorize(credentials)
-sh = gc.open_by_key("1bMMb7RO-xHPxPe7fAwoypHtt__APaLF7E5UMHyFEXHU")
-wk = sh.worksheet('nb_calls_bq')
-list_of_dicts = wk.get_all_records()
-calls_g_cite = pandas.DataFrame(list_of_dicts)
-for i in calls_g_cite.columns:
-    calls_g_cite[i] = calls_g_cite[i].astype(str)
-    
-nb_call_raw2 = calls_g_cite.copy()
 
 sh = gc.open_by_key("1xMDWCSt6Br5kCp1ekLGlIFLAGrHvWCaljgnXBngUieI")
 wk = sh.worksheet('list')
 list_of_dicts = wk.get_all_records()
 IB_CALLS = pandas.DataFrame(list_of_dicts)
 
-sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
+sh = gc.open_by_key("1ed1eWBT8B5_pTDYcihY64Q6Gt4hLXeRAiKSJn1KEU9o")
 wk = sh.worksheet('Лист1')
 list_of_dicts = wk.get_all_records()
 calls_g_c = pandas.DataFrame(list_of_dicts)
@@ -179,6 +171,8 @@ calls_g_c = pandas.DataFrame(list_of_dicts)
 IB_CALLS_CLEAN = ib_df_cleanup(IB_CALLS)
 NB_CALLS_CLEAN = NB_CALLS_CLEANUP(calls_g_c)
 
+min_record = str(min(NB_CALLS_CLEAN['date']))
+
 res  = clk.get_query_results(
     f"""
     ALTER TABLE google_sheets.IB DELETE WHERE 1=1
@@ -186,7 +180,7 @@ res  = clk.get_query_results(
 
 res  = clk.get_query_results(
     f"""
-    ALTER TABLE google_sheets.NB DELETE WHERE 1=1
+    ALTER TABLE google_sheets.NB DELETE WHERE date >= '{min_record}'
     """)
 
 # LOAD
