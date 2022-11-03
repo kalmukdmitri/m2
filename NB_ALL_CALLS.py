@@ -9,6 +9,7 @@ import gspread
 import string
 import bigquery_logger
 from google.cloud import bigquery
+import sys
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 
@@ -20,7 +21,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
 bigquery_client = bigquery.Client.from_service_account_json(key_path)
 
 table_log = bigquery_logger.bq_logger("sheets.NB_ALL_CALLS")
-
+min_record = str(min(calls_g_c['date_time']))
 try:
     
     start = datetime.datetime.today().date()
