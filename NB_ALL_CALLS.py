@@ -21,7 +21,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
 bigquery_client = bigquery.Client.from_service_account_json(key_path)
 
 table_log = bigquery_logger.bq_logger("sheets.NB_ALL_CALLS")
-min_record = str(min(calls_g_c['date_time']))
+
 try:
     
     start = datetime.datetime.today().date()
@@ -60,6 +60,7 @@ try:
     calls_g_c['sold_sum'] = calls_g_c['sold_sum'].astype(int)
     calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S" ))
     calls_g_c = calls_g_c.drop(columns = ['date_broken'])
+    min_record = str(min(calls_g_c['date_time']))
     
     q = f"""
         delete from m2-main.sheets.NB_ALL_CALLS
