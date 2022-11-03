@@ -28,17 +28,8 @@ try:
     table_log.add_data_start(str(start))
     table_log.add_data_end(str(end))
     
-    q = """
-        delete from m2-main.sheets.NB_ALL_CALLS
-        where extract(month from date_time) = extract(month from CURRENT_DATE()) 
-      and extract(year from date_time) = extract(year from CURRENT_DATE())
-    """
-    job = bigquery_client.query(q)
+    
 
-    gc = gspread.authorize(credentials)
-    sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
-    wk = sh.worksheet('Лист1')
-    list_of_dicts = wk.get_all_records()
 
     def max_sintise(str_raw):
         if type(str_raw) == str:
@@ -49,7 +40,7 @@ try:
         return str_raw
 
     gc = gspread.authorize(credentials)
-    sh = gc.open_by_key("1DaZoAZjE_yg2pKyAxY_YqBT6hWXuS-elHWPFvzgANbQ")
+    sh = gc.open_by_key("1ed1eWBT8B5_pTDYcihY64Q6Gt4hLXeRAiKSJn1KEU9o")
     wk = sh.worksheet('Лист1')
     list_of_dicts = wk.get_all_records()
     calls_g_c = pandas.DataFrame(list_of_dicts)
@@ -57,8 +48,6 @@ try:
     calls_g_c = calls_g_c[calls_g_c['date_time'] !=  '-']
     calls_g_c = calls_g_c.drop(columns = ['empt1', 'empt2', 'empt3','empt4'])
     calls_g_c = calls_g_c[calls_g_c['date_broken'] != 'TRUE'].reset_index(drop=True)
-    # calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('\\', '') if type(x) == str and '\\'  in x  else x )
-    # calls_g_c['comment'] = calls_g_c['comment'].apply(lambda x: x.replace('/', '') if type(x) == str and '/'  in x  else x )
     calls_g_c['comment'] = '-'
     calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: x.replace('   ',' '))
     calls_g_c['partner_source'] = calls_g_c['partner_source'].apply(lambda x: x if x not in ('','#N/A','#REF!') else '-')
@@ -70,15 +59,19 @@ try:
     calls_g_c['sold_sum'] = calls_g_c['sold_sum'].astype(int)
     calls_g_c['date_time'] = calls_g_c['date_time'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S" ))
     calls_g_c = calls_g_c.drop(columns = ['date_broken'])
-    calls_g_c = calls_g_c[calls_g_c.date_time.dt.year == datetime.datetime.today().year] \
-                        [calls_g_c.date_time.dt.month == datetime.datetime.today().month]
+    
+    q = f"""
+        delete from m2-main.sheets.NB_ALL_CALLS
+        where  date_time >= '{min_record}' 
+    """
+    job = bigquery_client.query(q)
+    
     calls_g_c.to_gbq(f'sheets.NB_ALL_CALLS', project_id='m2-main', if_exists='append', credentials=gbq_credential)
     
     print(len(calls_g_c))
     table_log.add_rows_recieved(len(calls_g_c))
     table_log.add_rows_updated(len(calls_g_c))
     table_log.no_errors_found()
-    
 
 except:
     table_log.errors_found(str(sys.exc_info()[1]))
