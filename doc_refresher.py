@@ -59,7 +59,8 @@ res_list = []
 month_list = [
 #     "Август",
     "Сентябрь",
-     "Октябрь"]
+     "Октябрь",
+    "Ноябрь"]
 for i in month_list:
     res_list.append(get_tabel_OPG(i))
 final = pandas.concat(res_list)
