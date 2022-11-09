@@ -26,7 +26,7 @@ def get_tabel_OPG(month):
      'Имя',
      'Статус обращения',
      'кол-во комнат',
-     'метраж',
+#      'метраж',
      'Результат',
      'Комментарии']
     drps = [i for i in list(calls_g_c3.columns) if i not in needed_M] 
@@ -44,7 +44,7 @@ def get_tabel_OPG(month):
      'Имя',
      'Статус обращения',
      'кол-во комнат',
-     'метраж',
+#      'метраж',
      'Результат',
      'Комментарии (локация, степень готовности, военная ипотека, сертификаты)']
     drps = [i for i in list(calls_g_c3.columns) if i not in needed_s] 
