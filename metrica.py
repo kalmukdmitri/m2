@@ -5,8 +5,8 @@ import datetime
 class metrica:
     #   Задаём ключ из файла
     
-    #key_path = '/home/web_analytics/creds_metrics.json'
-    key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\creds_metrics.json'
+    key_path = '/home/kalmukds/creds_metrics.json'
+    #key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\creds_metrics.json'
     metr_id = '56439838'
     
     f = open(key_path, "r")
