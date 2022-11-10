@@ -133,6 +133,14 @@ def all_event_transform_bq(all_traf_new):
     
     return all_traf_new
 
+
+def all_sessions_authes(all_traf_new, date):
+    all_traf_new['date'] = datetime.datetime.strptime(date,"%Y-%m-%d").date()
+    all_traf_new = all_traf_new.drop(columns = ['users'])
+
+    
+    return all_traf_new
+    
 tables = [
     {
      'name': 'ga.UA_TRAFIC_BIG',
@@ -208,8 +216,8 @@ tables = [
     },
       {'name': 'ga.SESSION_AUTHES',
      'bq_name': 'UA_REPORTS.SESSION_AUTHES',
-     'funcs' : all_event_transform,
-     'funcs_bq' : all_event_transform_bq,
+     'funcs' : all_sessions_authes,
+     'funcs_bq' : all_sessions_authes,
      'date_partition' : 'date',
      'params': {'dimetions': [
                              {'name': 'ga:dimension4'},
