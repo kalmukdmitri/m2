@@ -229,14 +229,23 @@ try:
             table_log.add_data_end(str(end))
 
             params = table['params']
-
-            UA_report = ga_conc.report_pd(dates_couples,params)
             
-            table_log.add_rows_recieved(len(UA_report))
+            
+            
+            for dates in dates_couples:
+
+                dates_couple_1 = [dates]
+
+                UA_report = ga_conc.report_pd(dates_couple_1,params)
+            
+                table_log.add_rows_recieved(len(UA_report))
 
             # Логируем полученые данные
-            UA_report = table['funcs'](UA_report) 
-            UA_report.to_gbq(table['name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+                print(dates_couple_1)
+                UA_report = table['funcs'](UA_report) 
+                UA_report.to_gbq(table['name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+                print(f'Loaded {dates_couple_1}')
+
 
             table_log.add_rows_updated(len(UA_report))
             ROWS_ALL_UPDATED += len(UA_report)
