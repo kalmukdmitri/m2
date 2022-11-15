@@ -102,81 +102,81 @@ def all_users_plus(all_traf_new):
 
 
 tables = [
-    {'name': 'UA_REPORTS.UA_TRAFIC_BIG',
-     'funcs' : all_traffic_transform,
-     'date_partition' : 'dateHourMinute',
-     'params': {'dimetions': [
-                             {'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:landingpagepath'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:sourcemedium'},                         
-                             {'name': 'ga:campaign'},
-                             {'name': 'ga:adContent'},
-                             {'name': 'ga:keyword'},
-                             {'name': 'ga:deviceCategory'}      
-                             ],
-                'metrics':   [
-                             {'expression': 'ga:users'}
-                             ],
-                'filters': ''}},
-    {'name': 'UA_REPORTS.USERS_DT',
-     'funcs' : all_users_transform,
-     'date_partition' : 'dateHourMinute',
-     'params': {'dimetions': [
-                             {'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension2'},
-                             {'name': 'ga:dimension3'}
-                             ],
-                'metrics':   [
-                             {'expression': 'ga:users'}
-                             ],
-                'filters': ''}},
-     {'name': 'UA_REPORTS.USERS',
-     'funcs' : all_users_legasy,
-     'date_partition' : 'date',
-     'params': {'dimetions': [
-                             {'name': 'ga:date'},
-                             {'name': 'ga:dimension1'},
-                             {'name': 'ga:dimension2'},
-                             {'name': 'ga:dimension3'}
-                             ],
-                'metrics':   [
-                             {'expression': 'ga:users'}
-                             ],
-                'filters': ''}},
+#     {'name': 'UA_REPORTS.UA_TRAFIC_BIG',
+#      'funcs' : all_traffic_transform,
+#      'date_partition' : 'dateHourMinute',
+#      'params': {'dimetions': [
+#                              {'name': 'ga:dateHourMinute'},
+#                              {'name': 'ga:landingpagepath'},
+#                              {'name': 'ga:dimension1'},
+#                              {'name': 'ga:dimension4'},
+#                              {'name': 'ga:sourcemedium'},                         
+#                              {'name': 'ga:campaign'},
+#                              {'name': 'ga:adContent'},
+#                              {'name': 'ga:keyword'},
+#                              {'name': 'ga:deviceCategory'}      
+#                              ],
+#                 'metrics':   [
+#                              {'expression': 'ga:users'}
+#                              ],
+#                 'filters': ''}},
+#     {'name': 'UA_REPORTS.USERS_DT',
+#      'funcs' : all_users_transform,
+#      'date_partition' : 'dateHourMinute',
+#      'params': {'dimetions': [
+#                              {'name': 'ga:dateHourMinute'},
+#                              {'name': 'ga:dimension1'},
+#                              {'name': 'ga:dimension2'},
+#                              {'name': 'ga:dimension3'}
+#                              ],
+#                 'metrics':   [
+#                              {'expression': 'ga:users'}
+#                              ],
+#                 'filters': ''}},
+#      {'name': 'UA_REPORTS.USERS',
+#      'funcs' : all_users_legasy,
+#      'date_partition' : 'date',
+#      'params': {'dimetions': [
+#                              {'name': 'ga:date'},
+#                              {'name': 'ga:dimension1'},
+#                              {'name': 'ga:dimension2'},
+#                              {'name': 'ga:dimension3'}
+#                              ],
+#                 'metrics':   [
+#                              {'expression': 'ga:users'}
+#                              ],
+#                 'filters': ''}},
     
-    {'name': 'UA_REPORTS.RAW_EVENTS',
-     'funcs' : all_event_transform,
-     'date_partition' : 'dateHourMinute',
-     'params': {'dimetions': [
-                             {'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'},
-                             {'name': 'ga:eventlabel'},            
-                             {'name': 'ga:eventAction'},
-                             {'name': 'ga:eventCategory'}
-                             ],
-                'metrics':   [
-                             {'expression': 'ga:users'},
-                             {'expression': 'ga:totalEvents'},
-                             {'expression': 'ga:uniqueEvents'}
-                             ],
-                'filters': 'ga:eventlabel!~View|^(Show)$'}},
+#     {'name': 'UA_REPORTS.RAW_EVENTS',
+#      'funcs' : all_event_transform,
+#      'date_partition' : 'dateHourMinute',
+#      'params': {'dimetions': [
+#                              {'name': 'ga:dateHourMinute'},
+#                              {'name': 'ga:dimension4'},
+#                              {'name': 'ga:pagepath'},
+#                              {'name': 'ga:eventlabel'},            
+#                              {'name': 'ga:eventAction'},
+#                              {'name': 'ga:eventCategory'}
+#                              ],
+#                 'metrics':   [
+#                              {'expression': 'ga:users'},
+#                              {'expression': 'ga:totalEvents'},
+#                              {'expression': 'ga:uniqueEvents'}
+#                              ],
+#                 'filters': 'ga:eventlabel!~View|^(Show)$'}},
     
-    {'name': 'UA_REPORTS.PAGE_VIEWS',
-     'funcs' : all_event_transform,
-     'date_partition' : 'dateHourMinute',
-     'params': {'dimetions': [
-                             {'name': 'ga:dateHourMinute'},
-                             {'name': 'ga:dimension4'},
-                             {'name': 'ga:pagepath'}
-                             ],
-                'metrics':   [
-                             {'expression': 'ga:pageviews'}
-                             ],
-                'filters': ''}},
+#     {'name': 'UA_REPORTS.PAGE_VIEWS',
+#      'funcs' : all_event_transform,
+#      'date_partition' : 'dateHourMinute',
+#      'params': {'dimetions': [
+#                              {'name': 'ga:dateHourMinute'},
+#                              {'name': 'ga:dimension4'},
+#                              {'name': 'ga:pagepath'}
+#                              ],
+#                 'metrics':   [
+#                              {'expression': 'ga:pageviews'}
+#                              ],
+#                 'filters': ''}},
     {'name': 'UA_REPORTS.VISIT_QUALITY',
      'funcs' : all_session_time,
      'date_partition' : 'date',
@@ -191,21 +191,21 @@ tables = [
                               {'expression': 'ga:hits'}
                               ],
                 'filters': ''}},
-     {'name': 'UA_REPORTS.USERS_INTERNAL_ID',
-     'funcs' : all_users_plus,
-     'date_partition' : 'date',
-     'params': {'dimetions': [
-                              {'name': 'ga:date'},
-                              {'name': 'ga:dimension11'},
-                              {'name': 'ga:dimension1'},
-                              {'name': 'ga:dimension2'},
-                              {'name': 'ga:dimension3'},
-                              {'name': 'ga:dimension4'},
-                              ],
-                'metrics':   [
-                              {'expression': 'ga:users'}
-                              ],
-                'filters': ''}}
+#      {'name': 'UA_REPORTS.USERS_INTERNAL_ID',
+#      'funcs' : all_users_plus,
+#      'date_partition' : 'date',
+#      'params': {'dimetions': [
+#                               {'name': 'ga:date'},
+#                               {'name': 'ga:dimension11'},
+#                               {'name': 'ga:dimension1'},
+#                               {'name': 'ga:dimension2'},
+#                               {'name': 'ga:dimension3'},
+#                               {'name': 'ga:dimension4'},
+#                               ],
+#                 'metrics':   [
+#                               {'expression': 'ga:users'}
+#                               ],
+#                 'filters': ''}}
 ]
 ga_conc = ga_connect('208464364')
 table_log_BIG = bigquery_logger.bq_logger('UA_REPORTS - ALL_TABLES')
