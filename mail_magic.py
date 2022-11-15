@@ -167,6 +167,7 @@ SELECT * FROM
     utm_source,
     utm_medium,
     utm_campaign,
+    utm_content,
     ROW_NUMBER() OVER (PARTITION BY PHONE ORDER BY date ASC) as first,
   FROM
     `m2-main.EXTERNAL_DATA_SOURCES.MAIL_DATA`)
@@ -190,13 +191,14 @@ QUIZ.date as date,
     utm_source,
     utm_medium,
     utm_campaign,
+    utm_content,
     MAX(sale_state) as sale_state,
     MAX(sold_sum) as sold_sum
 FROM QUIZ
 LEFT JOIN CALLS ON  caller= PHONE 
 AND QUIZ.date_lead <= CALLS.date
 WHERE sale_state = "Продан"
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 ORDER BY 1 asc
 """ 
 sales = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
