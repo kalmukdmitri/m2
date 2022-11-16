@@ -29,8 +29,6 @@ key_path_pg = '/home/kalmukds/pg_keys_special.json'
 f = open(key_path_pg, "r")
 key_other = f.read()
 keys = json.loads(key_other)['pg']
-engine = create_engine(keys)
-
 
 q = f"""SELECT * FROM schedules.view_refresh"""
 tables = clk.get_query_results(q)
@@ -39,7 +37,11 @@ for scripts in tables.iterrows():
     for line in script_str:
         line = line.strip()
         if line != '':
-            clk.get_query_results(line)
+            print(line)
+            try:
+                clk.get_query_results(line)
+            except:
+                print(str(sys.exc_info()[1]))
 q= '''SELECT
   table_name
 FROM
@@ -67,17 +69,21 @@ table_dict = {
 }
 
 for table in tables:
-    
-    print(table_dict[table])
-    
-    q = f'''SELECT * FROM {table}'''
-    
-    table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-    if 'date' not in table_df.columns:
-        table_df['date'] = datetime.datetime.now().date()
-    click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
-    q = f'''
-        TRUNCATE TABLE
-        {table_dict[table]} '''
-    engine.execute(q)
-    upload_multipart(click_name,table_df)
+    try:
+        print(table_dict[table])
+
+        q = f'''SELECT * FROM {table}'''
+        engine = create_engine(keys)
+        table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+        if 'date' not in table_df.columns:
+            table_df['date'] = datetime.datetime.now().date()
+        click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
+        q = f'''
+            TRUNCATE TABLE
+            {table_dict[table]} '''
+        engine.execute(q)
+
+        upload_multipart(click_name,table_df)
+        engine.dispose()
+    except:
+        print(str(sys.exc_info()[1]))
