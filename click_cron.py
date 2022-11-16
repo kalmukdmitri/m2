@@ -87,3 +87,27 @@ for table in tables:
         engine.dispose()
     except:
         print(str(sys.exc_info()[1]))
+        
+internal_table_dict = {
+    'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
+                        'source': 'export_pg.NB_GAINS_VIEW'}
+}
+
+    
+for table in internal_table_dict:
+    
+    print(internal_table_dict[table])
+    
+    engine = create_engine(keys)
+    
+    if 'date' not in table_df.columns:
+        table_df['date'] = datetime.datetime.now().date()
+    q = f'''
+        TRUNCATE TABLE
+        {internal_table_dict[table]['resulter']} '''
+    engine.execute(q)
+    print(q)
+    q = f'''INSERT INTO {table} SELECT * FROM {internal_table_dict[table]['source']};'''
+    clk.get_query_results(q)
+    print(q)
+    engine.dispose()
