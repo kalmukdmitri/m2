@@ -74,6 +74,7 @@ table_dict = {
 for table in tables:
     try:
         print(table_dict[table])
+        print(keys)
 
         q = f'''SELECT * FROM {table}'''
         engine_raw = create_engine(keys)
