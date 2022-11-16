@@ -30,6 +30,8 @@ f = open(key_path_pg, "r")
 key_other = f.read()
 keys = json.loads(key_other)['pg']
 print(keys)
+engine_raw = create_engine(keys)
+engine_pg = engine_raw.execution_options(isolation_level="AUTOCOMMIT")
 
 q = f"""SELECT * FROM schedules.view_refresh"""
 tables = clk.get_query_results(q)
@@ -43,7 +45,8 @@ for scripts in tables.iterrows():
                 clk.get_query_results(line)
             except:
                 print(str(sys.exc_info()[1]))
-q= '''SELECT
+q= '''
+SELECT
   table_name
 FROM
   EXPORT_CLICK.INFORMATION_SCHEMA.VIEWS;'''
@@ -66,15 +69,15 @@ table_dict = {
 '`EXPORT_CLICK.installs by month`': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
 '`EXPORT_CLICK.web_mau`': '"STG_CLICK_WEBAPP"."WEB_MAU"',
 '`EXPORT_CLICK.installs by date`':'"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
-'`EXPORT_CLICK.app_mau`':'"STG_CLICK_WEBAPP"."APP_MAU"'
-}
+'`EXPORT_CLICK.app_mau`':'"STG_CLICK_WEBAPP"."APP_MAU"'}
 
 for table in tables:
     try:
         print(table_dict[table])
 
         q = f'''SELECT * FROM {table}'''
-        engine = create_engine(keys)
+        engine_raw = create_engine(keys)
+        engine_pg = engine_raw.execution_options(isolation_level="AUTOCOMMIT")
         table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
         if 'date' not in table_df.columns:
             table_df['date'] = datetime.datetime.now().date()
@@ -82,7 +85,7 @@ for table in tables:
         q = f'''
             TRUNCATE TABLE
             {table_dict[table]} '''
-        engine.execute(q)
+        engine_pg.execute(q)
 
         upload_multipart(click_name,table_df)
         engine.dispose()
@@ -91,22 +94,22 @@ for table in tables:
         
 internal_table_dict = {
     'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
-                        'source': 'export_pg.NB_GAINS_VIEW'}
-}
+                           'source': 'export_pg.NB_GAINS_VIEW'}}
 
     
 for table in internal_table_dict:
     
     print(internal_table_dict[table])
     
-    engine = create_engine(keys)
+    engine_raw = create_engine(keys)
+    engine_pg = engine_raw.execution_options(isolation_level="AUTOCOMMIT")
     
     if 'date' not in table_df.columns:
         table_df['date'] = datetime.datetime.now().date()
     q = f'''
         TRUNCATE TABLE
         {internal_table_dict[table]['resulter']} '''
-    engine.execute(q)
+    engine_pg.execute(q)
     print(q)
     q = f'''INSERT INTO {table} SELECT * FROM {internal_table_dict[table]['source']};'''
     clk.get_query_results(q)
