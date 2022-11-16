@@ -29,6 +29,7 @@ key_path_pg = '/home/kalmukds/pg_keys_special.json'
 f = open(key_path_pg, "r")
 key_other = f.read()
 keys = json.loads(key_other)['pg']
+print(keys)
 
 q = f"""SELECT * FROM schedules.view_refresh"""
 tables = clk.get_query_results(q)
