@@ -178,7 +178,6 @@ tables = [
                              {'expression': 'ga:users'}
                              ],
                 'filters': ''}},
-    
     {'name': 'ga.RAW_EVENTS',
      'bq_name': 'UA_REPORTS.RAW_EVENTS',
      'funcs' : all_event_transform,
@@ -212,9 +211,8 @@ tables = [
                 'metrics':   [
                              {'expression': 'ga:pageviews'}
                              ],
-                'filters': ''}
-    },
-      {'name': 'ga.SESSION_AUTHES',
+                'filters': ''}},
+    {'name': 'ga.SESSION_AUTHES',
      'bq_name': 'UA_REPORTS.SESSION_AUTHES',
      'funcs' : all_sessions_authes,
      'funcs_bq' : all_sessions_authes,
@@ -226,10 +224,24 @@ tables = [
                 'metrics':   [
                              {'expression': 'ga:users'}
                              ],
-                'filters': ''}
-    },    
-    {
-     'name': 'ga.RAW_EVENTS_IB_REQUESTS',
+                'filters': ''}}, 
+    {'name': 'ga.VISIT_QUALITY',
+     'bq_name': 'UA_REPORTS.VISIT_QUALITY',
+     'funcs' : all_session_time,
+     'funcs_bq' : all_session_time,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                              {'name': 'ga:date'},
+                              {'name': 'ga:dimension4'},
+                              {'name': 'ga:dimension1'},
+                             ],
+                'metrics':   [
+                              {'expression': 'ga:bounces'},
+                              {'expression': 'ga:sessionDuration'},
+                              {'expression': 'ga:hits'}
+                             ],
+                'filters': ''}}, 
+    {'name': 'ga.RAW_EVENTS_IB_REQUESTS',
      'bq_name': 'UA_REPORTS.RAW_EVENTS_IB_REQUESTS',
      'funcs' : all_event_transform,
      'funcs_bq' : all_event_transform_bq,
