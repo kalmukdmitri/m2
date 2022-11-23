@@ -124,7 +124,7 @@ SELECT * FROM "MART_AUTH"."REGISTRATIONS"
 where report_type = 'Зарегистрированный пользователь (установлен пароль)' '''
 regs = get_df(q, engine)
 regs['date'] = regs['registration_date'] 
-regs = regs.drop(columns = ['registration_date','registration_week','registration_month','tech_load_ts','cnt_registrations','report_type' ])
+regs = regs[['user_code','user_email','user_phone','role','date']]
 regs = regs.sort_values(['date']).reset_index(drop=True)
 
 clk  = clickhouse_pandas('web')
