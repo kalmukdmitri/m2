@@ -3,6 +3,7 @@ import pandas
 from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
+import sys
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
@@ -59,10 +60,15 @@ res_list = []
 month_list = [
 #     "Август",
     "Сентябрь",
-     "Октябрь",
-    "Ноябрь"]
+    "Октябрь",
+    "Ноябрь",
+    "Январь"]
 for i in month_list:
-    res_list.append(get_tabel_OPG(i))
+    try:
+        res_list.append(get_tabel_OPG(i))
+    except:
+        print(str(sys.exc_info()[1]))
+        
 final = pandas.concat(res_list)
 
 final_s = final[final['Регион'] == 'СПБ'].reset_index(drop = True)
