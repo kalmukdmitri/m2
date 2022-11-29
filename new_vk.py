@@ -1,5 +1,6 @@
 import pandas
 import pandas_gbq
+from clickhouse_py  import clickhouse_pandas, clickhouse_logger
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
