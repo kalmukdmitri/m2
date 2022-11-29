@@ -9,7 +9,7 @@ import gspread
 import os
 
 # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
-key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
+key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
 
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
