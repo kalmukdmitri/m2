@@ -4,9 +4,9 @@ import datetime
 import pandas
 import json
 
-key_path_click = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\click.json'
+# key_path_click = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\click.json'
 
-# key_path_click = '/home/kalmukds/click.json'
+key_path_click = '/home/kalmukds/click.json'
 
 f = open(key_path_click, "r")
 key_other = f.read()
@@ -39,22 +39,15 @@ client = init_client()
 res = client.execute('''SELECT * from monetization_registry.payment_detailed''')
 cols = client.execute('''DESCRIBE TABLE monetization_registry.payment_detailed''')
 cols = list(pandas.DataFrame(cols)[0])
-results = pandas.DataFrame(res, columns = cols )
+results = pandas.DataFrame(res, columns = cols)
+results['order_id'] = results['order_id'].astype(str)
+results['payer_user_id'] = results['payer_user_id'].astype(str)
 
-key_path_pgs = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\ps_key.txt'
-key_path_pgs = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\ps_key.txt'
+from clickhouse_py  import clickhouse_pandas, clickhouse_logger
+results['payment_dt'] = results['payment_dt'].dt.tz_localize(None)
+results['date'] = results['payment_dt'].apply(lambda x : x.date())
+clk  = clickhouse_pandas('external')
 
-f = open(key_path_pgs, "r")
-postrges_key = f.read()
-engine = create_engine(postrges_key)
-q = '''
-TRUNCATE TABLE
-
-"USER_KALMUKDS"."UP_VAS_TABLE"
-
-'''
-engine.execute(q)
-results.to_sql("UP_VAS_TABLE", method='multi', con=engine,  schema="USER_KALMUKDS", index = False, if_exists = 'append')
-
-
-results.to_sql("UP_VAS_TABLE", method='multi', con=engine,  schema="USER_KALMUKDS", index = False, if_exists = 'append')
+q = 'ALTER TABLE external.UP_VAS_TABLE DELETE WHERE 1=1'
+clk.query(q)
+upload_multipart('external.UP_VAS_TABLE', results)
