@@ -25,7 +25,7 @@ clk  = clickhouse_pandas('ga')
 
 q = f"""
 SELECT *
-FROM appsflyer.vk_leads
+FROM appsflyer.vk_leads_new
 """
 
 wewe = clk.get_query_results(q)
