@@ -127,7 +127,7 @@ regs['date'] = regs['registration_date']
 regs = regs[['user_code','user_email','user_phone','role','date']]
 regs = regs.sort_values(['date']).reset_index(drop=True)
 
-clk  = clickhouse_pandas('web')
+clk  = clickhouse_pandas('web') 
 res  = clk.get_query_results(
     f"""
     ALTER TABLE pg.PG_REGS DELETE  WHERE 1 = 1
@@ -136,6 +136,28 @@ res  = clk.get_query_results(
 regs = regs.sort_values(['date']).reset_index(drop=True)
 
 upload_multipart('pg.PG_REGS', regs)
+
+q = '''
+SELECT * FROM "MART_AUTH"."REGISTRATIONS"  '''
+
+regs = get_df(q, engine)
+regs['date'] = regs['registration_date']
+regs = regs[['user_code',
+ 'user_email',
+ 'user_phone',
+ 'report_type',
+ 'role',
+ 'role_detail',
+ 'date']]
+regs = regs.sort_values(['date']).reset_index(drop=True)
+
+clk  = clickhouse_pandas('web') 
+res  = clk.get_query_results(f"""
+ALTER TABLE pg.PG_REGS_FULL DELETE WHERE 1 = 1""")
+
+regs = regs.sort_values(['date']).reset_index(drop=True)
+
+upload_multipart('pg.PG_REGS_FULL', regs)
 
 regs = regs.drop(columns = ['user_email','user_phone'])
 
