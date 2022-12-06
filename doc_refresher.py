@@ -4,8 +4,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
 import sys
-
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
+# key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
              'https://spreadsheets.google.com/feeds',
@@ -62,7 +62,7 @@ month_list = [
     "Сентябрь",
     "Октябрь",
     "Ноябрь",
-    "Денабрь",
+    "Декабрь",
 #     "Январь"
 ]
 for i in month_list:
@@ -85,9 +85,9 @@ def sheet_ready(df_r):
     return rows
 
 sh = gc.open_by_key("17p9apeWzq_Cg8HnyD25XT-UiHT5-xSI-94bzDjMVooY")
-wk = sh.worksheet('MSK 2022.09')
+wk = sh.worksheet('MSK 2022.12')
 g_clop=sheet_ready(final_m)
 wk.update('A1',g_clop)
-wk = sh.worksheet('СПБ 2022.09')
+wk = sh.worksheet('СПБ 2022.12')
 g_clop=sheet_ready(final_s)
 wk.update('A1',g_clop)
