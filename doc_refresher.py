@@ -63,7 +63,8 @@ month_list = [
     "Октябрь",
     "Ноябрь",
     "Денабрь",
-    "Январь"]
+#     "Январь"
+]
 for i in month_list:
     try:
         res_list.append(get_tabel_OPG(i))
