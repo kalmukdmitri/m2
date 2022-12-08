@@ -1,4 +1,5 @@
 from clickhouse_py  import clickhouse_pandas, clickhouse_logger
+import sys
 
 clk = clickhouse_pandas('ga')
 q = f"""SELECT * FROM schedules.view_refresh"""
