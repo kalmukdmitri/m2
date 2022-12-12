@@ -279,8 +279,9 @@ for client, token_log in token.items():
     ads_ids = ydx.parse_ads_utms()
     ads_ids = {str(i):e for i,e in ads_ids.items()}
     
-    q  = '''
+    q  = f'''
     SELECT MAX(date) as l_dt FROM external.YANDEX_FULL_DATA
+    where client = {client}
     '''
     
     last_date_ct = clk.get_query_results(q)['l_dt'][0]
@@ -290,13 +291,17 @@ for client, token_log in token.items():
     dates = [str(start_date+datetime.timedelta(days=i)) for i in range((end_date-start_date).days+1)]
     
     
-    res  = clk.get_query_results(
-        f"""
-        ALTER TABLE external.YANDEX_FULL_DATA DELETE WHERE date >= '{start_date}'
-        """)
+
     
     for date in dates:
-        print(date)
+        print(date, client)
         print('\n')
+
         Ads_table = ydx.ads_full_process(date,date,ads_ids)
-        clk.insert(Ads_table, 'external.YANDEX_FULL_DATA')
+        if len(Ads_table) > 0:
+            res  = clk.get_query_results(
+                f"""
+                ALTER TABLE external.YANDEX_FULL_DATA DELETE WHERE date = '{date}'
+                and client = {client}
+        """)
+            clk.insert(Ads_table, 'external.YANDEX_FULL_DATA')
