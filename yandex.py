@@ -289,11 +289,14 @@ for client, token_log in token.items():
     end_date   = datetime.datetime.today().date() - datetime.timedelta(days=1)
     dates = [str(start_date+datetime.timedelta(days=i)) for i in range((end_date-start_date).days+1)]
     
+    
     res  = clk.get_query_results(
         f"""
         ALTER TABLE external.YANDEX_FULL_DATA DELETE WHERE date >= '{start_date}'
         """)
     
     for date in dates:
+        print(date)
+        print('\n')
         Ads_table = ydx.ads_full_process(date,date,ads_ids)
         clk.insert(Ads_table, 'external.YANDEX_FULL_DATA')
