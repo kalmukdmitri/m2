@@ -265,9 +265,9 @@ class yandex_direct:
         final_ads['date'] = final_ads['date'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d").date())
         return final_ads
     
-# key_path_extra = '/home/kalmukds/token_y.json'
+key_path_extra = '/home/kalmukds/token_y.json'
 print("started")
-key_path_extra = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\token_y.json'
+# key_path_extra = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\token_y.json'
 clk  = clickhouse_pandas('external')
 f = open(key_path_extra, "r")
 key_other = f.read()
