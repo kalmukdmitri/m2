@@ -266,7 +266,7 @@ class yandex_direct:
         return final_ads
     
 # key_path_extra = '/home/kalmukds/token_y.json'
-print(started)
+print("started")
 key_path_extra = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\token_y.json'
 clk  = clickhouse_pandas('external')
 f = open(key_path_extra, "r")
