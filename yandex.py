@@ -286,7 +286,10 @@ for client, token_log in token.items():
     
     last_date_ct = clk.get_query_results(q)['l_dt'][0]
     
+    
     start_date = last_date_ct - datetime.timedelta(days=2)
+    if "1969-12-30" == str(start_date):
+        start_date =datetime.date(2022,12,1)
     end_date   = datetime.datetime.today().date() - datetime.timedelta(days=1)
     dates = [str(start_date+datetime.timedelta(days=i)) for i in range((end_date-start_date).days+1)]
     
