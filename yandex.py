@@ -302,6 +302,6 @@ for client, token_log in token.items():
             res  = clk.get_query_results(
                 f"""
                 ALTER TABLE external.YANDEX_FULL_DATA DELETE WHERE date = '{date}'
-                and client = {client}
+                and client = "{client}"
         """)
             clk.insert(Ads_table, 'external.YANDEX_FULL_DATA')
