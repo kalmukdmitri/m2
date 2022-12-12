@@ -281,7 +281,7 @@ for client, token_log in token.items():
     
     q  = f'''
     SELECT MAX(date) as l_dt FROM external.YANDEX_FULL_DATA
-    where client = {client}
+    where client = "{client}"
     '''
     
     last_date_ct = clk.get_query_results(q)['l_dt'][0]
