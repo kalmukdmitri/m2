@@ -28,6 +28,17 @@ tokem = keys['tokem']
 mod_id = keys['id']
 cabinet = keys['cabinet']
 
+def upload_multipart(table_name, df):
+    
+    dates_list = list(set(df['date']))
+    dates_list.sort()
+    
+    for i in range(0,len(dates_list), 10):
+        
+        date_block = dates_list[i:i+10]
+        regs_date = df[df['date'].apply(lambda x: x in date_block)]
+        regs_date = regs_date.reset_index(drop=True)
+        clk.insert(regs_date, table_name)
 
 def get_calls(start,end):
     start = start.strftime('%d/%m/%Y')
@@ -74,7 +85,7 @@ def get_calls(start,end):
 clk  = clickhouse_pandas('kalmukds')
 # clk.creat_table_df(part2, 'CALLTOUCH_JOURNAL')
 q  = '''
-SELECT MAX(date) as l_dt FROM kalmukds.CALLTOUCH_JOURNAL
+SELECT MAX(date) as l_dt FROM external.CALLTOUCH_JOURNAL
 '''
 last_date_ct = clk.get_query_results(q)['l_dt'][0]
 start_date = last_date_ct - datetime.timedelta(days=2)
@@ -82,11 +93,17 @@ end_date   = datetime.datetime.today().date() - datetime.timedelta(days=1)
 
 new_rows = get_calls(start_date,end_date)
 new_rows['date'] = new_rows['date_time_msk'].apply(lambda x: x.date())
+for i in new_rows:
+    if type(new_rows[i][0]) == numpy.int64:
+        new_rows[i] = new_rows[i].astype(int)
+    if type(new_rows[i][0]) == numpy.int32:
+        new_rows[i] = new_rows[i].astype(int)  
 if len(new_rows) > 0 :
     
     print(len(new_rows))
     res  = clk.get_query_results(
         f"""
-        ALTER TABLE kalmukds.CALLTOUCH_JOURNAL DELETE WHERE date >= '{start_date}'
+        ALTER TABLE external.CALLTOUCH_JOURNAL DELETE WHERE date >= '{start_date}'
         """)
-    clk.insert(new_rows, 'kalmukds.CALLTOUCH_JOURNAL')
+    
+    upload_multipart('external.CALLTOUCH_JOURNAL', new_rows)
