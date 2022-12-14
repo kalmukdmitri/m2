@@ -66,6 +66,11 @@ clear_q = f"SELECT MAX(date) as dt FROM {table_click}; "
 lst_record = clk.get_query_results(clear_q)['dt'][0]
 
 while lst_record < datetime.date(2022,12,1):
+
+clear_q = f"SELECT MAX(date) as dt FROM {table_click};"
+lst_record = clk.get_query_results(clear_q)['dt'][0]
+
+while lst_record < datetime.date(2022,12,1):
     q = f'''SELECT * FROM {table_bq} where Date > '{lst_record}' and Date <= '{lst_record + datetime.timedelta(days=30)}'
     '''
     print(q)
@@ -77,3 +82,5 @@ while lst_record < datetime.date(2022,12,1):
     
 
     upload_multipart(table_click, table_df_bq)
+    clear_q = f"SELECT MAX(date) as dt FROM {table_click};"
+    lst_record = clk.get_query_results(clear_q)['dt'][0]
