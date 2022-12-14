@@ -3,7 +3,7 @@ import sys
 
 clk = clickhouse_pandas('ga')
 q = f"""SELECT * FROM schedules.view_refresh
-order by order desc"""
+order by order ACS"""
 tables = clk.get_query_results(q)
 for scripts in tables.iterrows():
     script_str = scripts[1].script.split(';')
