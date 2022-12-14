@@ -2,7 +2,8 @@ from clickhouse_py  import clickhouse_pandas, clickhouse_logger
 import sys
 
 clk = clickhouse_pandas('ga')
-q = f"""SELECT * FROM schedules.view_refresh"""
+q = f"""SELECT * FROM schedules.view_refresh
+order by order desc"""
 tables = clk.get_query_results(q)
 for scripts in tables.iterrows():
     script_str = scripts[1].script.split(';')
