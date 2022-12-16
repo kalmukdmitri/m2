@@ -65,25 +65,27 @@ for table in tables:
 #     try:
     print(table_dict[table])
     print(keys)
-
-    q = f'''SELECT * FROM {table}'''
-    print(q)
-    table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-    if 'date' not in table_df.columns:
-        table_df['date'] = datetime.datetime.now().date()
-    click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
-
-    with engine.connect() as connection:
-
-        q = f'''
-        TRUNCATE TABLE {table_dict[table]} '''
+    try:
+        q = f'''SELECT * FROM {table}'''
         print(q)
-        result = connection.execute(q)
-        time.sleep(3)
-        connection.close()
+        table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+        if 'date' not in table_df.columns:
+            table_df['date'] = datetime.datetime.now().date()
+        click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
 
-    upload_multipart(click_name,table_df)
+        with engine.connect() as connection:
 
+            q = f'''
+            TRUNCATE TABLE {table_dict[table]} '''
+            print(q)
+            result = connection.execute(q)
+            time.sleep(3)
+            connection.close()
+
+        upload_multipart(click_name,table_df)
+    except:
+        print('error')
+engine.dispose()  
 #     except:
 #         print(str(sys.exc_info()[1]))
         
@@ -91,26 +93,26 @@ internal_table_dict = {
     'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
                            'source': 'export_pg.NB_GAINS_VIEW'}}
 
-    
+engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
+clk  = clickhouse_pandas('ga')
 for table in internal_table_dict:
     
     print(internal_table_dict[table])
-    
-    
-    if 'date' not in table_df.columns:
-        table_df['date'] = datetime.datetime.now().date()
+    try:    
         
-    with engine.connect() as connection:
-        
-        q = f'''
-        TRUNCATE TABLE {internal_table_dict[table]['resulter']} '''
-        print(q)
-        result = connection.execute(q)
-        time.sleep(3)
-        connection.close()
+        with engine.connect() as connection:
 
-    q = f'''INSERT INTO {table} SELECT * FROM {internal_table_dict[table]['source']};'''
-    print(q)
-    clk.get_query_results(q)
+            q = f'''
+            TRUNCATE TABLE {internal_table_dict[table]['resulter']} '''
+            print(q)
+            result = connection.execute(q)
+            time.sleep(3)
+            connection.close()
+
+        q = f'''INSERT INTO {table} SELECT * FROM {internal_table_dict[table]['source']};'''
+        print(q)
+        clk.get_query_results(q)
+    except:
+        print('error')
     
 engine.dispose()    
