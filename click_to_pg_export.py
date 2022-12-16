@@ -84,7 +84,7 @@ for table in tables:
 
         upload_multipart(click_name,table_df)
     except:
-        print('error')
+        print(str(sys.exc_info()[1]))
 engine.dispose()  
 #     except:
 #         print(str(sys.exc_info()[1]))
@@ -113,6 +113,6 @@ for table in internal_table_dict:
         print(q)
         clk.get_query_results(q)
     except:
-        print('error')
+        print(str(sys.exc_info()[1]))
     
 engine.dispose()    
