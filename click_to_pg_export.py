@@ -1,6 +1,5 @@
 from clickhouse_py  import clickhouse_pandas, clickhouse_logger
 from datetime import datetime
-from ga_connector_click import ga_connect
 from sqlalchemy import create_engine
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
