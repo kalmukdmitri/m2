@@ -163,4 +163,4 @@ clk.creat_table_df(clean_mail,'external.MAIL_DATA')
 clear_q = f"ALTER TABLE external.MAIL_DATA DELETE WHERE 1 = 1"
 clk.get_query_results(clear_q) 
 
-upload_multipart('external.VK_CLEAN_DATA', clean_mail)
+upload_multipart('external.MAIL_DATA', clean_mail)
