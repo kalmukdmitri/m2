@@ -158,9 +158,9 @@ clean_mail = mail_raw_pd.drop(columns = drops)
 # clean_mail.to_gbq(f'EXTERNAL_DATA_SOURCES.MAIL_DATA', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 
-clk.creat_table_df(vk_df_new,'external.MAIL_DATA')
+clk.creat_table_df(clean_mail,'external.MAIL_DATA')
 
 clear_q = f"ALTER TABLE external.MAIL_DATA DELETE WHERE 1 = 1"
 clk.get_query_results(clear_q) 
 
-upload_multipart('external.VK_CLEAN_DATA', vk_df_new)
+upload_multipart('external.VK_CLEAN_DATA', clean_mail)
