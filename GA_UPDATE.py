@@ -296,7 +296,7 @@ try:
                 dates_couple_1 = [dates]
 
                 UA_report = ga_conc.report_pd(dates_couple_1,params)
-                UA_BQ = UA_report.copy()
+#                 UA_BQ = UA_report.copy()
                 UA_CLICK = UA_report.copy()
 
                 logger_table.add_rows_recieved(len(UA_CLICK))
@@ -304,19 +304,19 @@ try:
                 if 'ga.SESSION_AUTHES' == table['name']:
 
                     UA_report_click = table['funcs'](UA_CLICK, dates[0])
-                    UA_report_bq = table['funcs_bq'](UA_BQ, dates[0])
+#                     UA_report_bq = table['funcs_bq'](UA_BQ, dates[0])
 
                 else:
 
                     UA_report_click = table['funcs'](UA_CLICK)
-                    UA_report_bq = table['funcs_bq'](UA_BQ)
+#                     UA_report_bq = table['funcs_bq'](UA_BQ)
 
                 # Записываем полученные данные
                 
                 clk  = clickhouse_pandas('ga')
                 clk.insert(UA_report_click, table['name'])
 
-                UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
+#                 UA_report_bq.to_gbq(table['bq_name'], project_id='m2-main',chunksize=20000, if_exists='append', credentials=gbq_credential)
                 
             # Логируем полученые данные 
 
