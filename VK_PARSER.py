@@ -174,20 +174,20 @@ final_data = pandas.concat(final_dfs)
 final_data['date'] = final_data['day'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d" ).date())
 final_data = final_data.drop(columns = ['day']).reset_index(drop=True)
 
-key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
-# key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
+# key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
+# # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 
-gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
-             'https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
+# gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
+# SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
+#              'https://spreadsheets.google.com/feeds',
+#          'https://www.googleapis.com/auth/drive']
 
-from io import StringIO
-temp_csv_string = final_data.to_csv(sep=";", index=False)
-temp_csv_string_IO = StringIO(temp_csv_string)
+# from io import StringIO
+# temp_csv_string = final_data.to_csv(sep=";", index=False)
+# temp_csv_string_IO = StringIO(temp_csv_string)
 # create new dataframe from string variable
-final_data_new = pandas.read_csv(temp_csv_string_IO, sep=";")
-final_data_new.to_gbq(f'ADS_COST.VK_CUSTOM_COSTS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
+# final_data_new = pandas.read_csv(temp_csv_string_IO, sep=";")
+# final_data_new.to_gbq(f'ADS_COST.VK_CUSTOM_COSTS', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
 from clickhouse_py  import clickhouse_pandas
 
