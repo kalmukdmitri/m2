@@ -21,7 +21,7 @@ import time
 
 # key_path = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\m2-main-cd9ed0b4e222.json'
 key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
-gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
+# gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 clk  = clickhouse_pandas('ga')
 
 key_path_pg = '/home/kalmukds/pg_keys_special.json'
@@ -29,17 +29,17 @@ key_path_pg = '/home/kalmukds/pg_keys_special.json'
 f = open(key_path_pg, "r")
 key_other = f.read()
 keys = json.loads(key_other)['pg']
-print(keys)
+# print(keys)
 
-q= '''
-SELECT
-  table_name
-FROM
-  EXPORT_CLICK.INFORMATION_SCHEMA.VIEWS;'''
-export_tables = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)  
-tables = ['`EXPORT_CLICK.'+f'{i}`' for i in export_tables['table_name']]
+# q= '''
+# SELECT
+#   table_name
+# FROM
+#   EXPORT_CLICK.INFORMATION_SCHEMA.VIEWS;'''
+# export_tables = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)  
+# tables = ['`EXPORT_CLICK.'+f'{i}`' for i in export_tables['table_name']]
 
-engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
+# engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
 
 
 def upload_multipart(table_name, df):
@@ -54,37 +54,37 @@ def upload_multipart(table_name, df):
         regs_date = regs_date.reset_index(drop=True)
         clk.insert(regs_date, table_name)
         
-table_dict = {
-'`EXPORT_CLICK.installs by month`': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
-'`EXPORT_CLICK.web_mau`': '"STG_CLICK_WEBAPP"."WEB_MAU"',
-'`EXPORT_CLICK.installs by date`':'"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
-'`EXPORT_CLICK.app_mau`':'"STG_CLICK_WEBAPP"."APP_MAU"'}
+# table_dict = {
+# '`EXPORT_CLICK.installs by month`': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
+# '`EXPORT_CLICK.web_mau`': '"STG_CLICK_WEBAPP"."WEB_MAU"',
+# '`EXPORT_CLICK.installs by date`':'"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
+# '`EXPORT_CLICK.app_mau`':'"STG_CLICK_WEBAPP"."APP_MAU"'}
 
-for table in tables:
+# for table in tables:
+# #     try:
+#     print(table_dict[table])
+#     print(keys)
 #     try:
-    print(table_dict[table])
-    print(keys)
-    try:
-        q = f'''SELECT * FROM {table}'''
-        print(q)
-        table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-        if 'date' not in table_df.columns:
-            table_df['date'] = datetime.datetime.now().date()
-        click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
+#         q = f'''SELECT * FROM {table}'''
+#         print(q)
+#         table_df = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+#         if 'date' not in table_df.columns:
+#             table_df['date'] = datetime.datetime.now().date()
+#         click_name = 'export_pg.'+table.replace(' ','_').replace('EXPORT_CLICK.','BQ_').replace('`','')
 
-        with engine.connect() as connection:
+#         with engine.connect() as connection:
 
-            q = f'''
-            TRUNCATE TABLE {table_dict[table]} '''
-            print(q)
-            result = connection.execute(q)
-            time.sleep(3)
-            connection.close()
+#             q = f'''
+#             TRUNCATE TABLE {table_dict[table]} '''
+#             print(q)
+#             result = connection.execute(q)
+#             time.sleep(3)
+#             connection.close()
 
-        upload_multipart(click_name,table_df)
-    except:
-        print(str(sys.exc_info()[1]))
-engine.dispose()  
+#         upload_multipart(click_name,table_df)
+#     except:
+#         print(str(sys.exc_info()[1]))
+# engine.dispose()  
 #     except:
 #         print(str(sys.exc_info()[1]))
         
@@ -92,8 +92,7 @@ internal_table_dict = {
     'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
                            'source': 'export_pg.NB_GAINS_VIEW'},
     'export_pg.UP_VAS_TABLE': {'resulter': '"STG_CLICK_WEBAPP"."UP_VAS_TABLE"',
-                           'source': 'external.UP_VAS_TABLE'},
-
+                           'source': 'external.UP_VAS_TABLE'}
 }
 
 engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
