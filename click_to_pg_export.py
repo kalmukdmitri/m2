@@ -90,7 +90,11 @@ engine.dispose()
         
 internal_table_dict = {
     'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
-                           'source': 'export_pg.NB_GAINS_VIEW'}}
+                           'source': 'export_pg.NB_GAINS_VIEW'},
+    'export_pg.UP_VAS_TABLE': {'resulter': '"STG_CLICK_WEBAPP"."UP_VAS_TABLE"',
+                           'source': 'external.UP_VAS_TABLE'},
+
+}
 
 engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
 clk  = clickhouse_pandas('ga')
