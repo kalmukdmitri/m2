@@ -209,7 +209,8 @@ tables = [
                              {'name': 'ga:pagepath'}
                              ],
                 'metrics':   [
-                             {'expression': 'ga:pageviews'}
+                                {'expression': 'ga:timeOnPage'},
+                                {'expression': 'ga:pageviews'}
                              ],
                 'filters': ''}},
     {'name': 'ga.SESSION_AUTHES',
