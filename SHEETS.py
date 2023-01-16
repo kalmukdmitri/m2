@@ -152,7 +152,7 @@ def upload_multipart(table_name, df):
 
 # regs_full = regs_full.sort_values(['date']).reset_index(drop=True)
 
-# clk  = clickhouse_pandas('web') 
+clk  = clickhouse_pandas('web') 
 # res  = clk.get_query_results(f"""
 # ALTER TABLE pg.PG_REGS_FULL DELETE WHERE 1 = 1""")
 
