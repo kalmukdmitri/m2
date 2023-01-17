@@ -138,6 +138,6 @@ drops = ['user_registration_date',
 load = load.drop(columns = drops)
 
 sh = gc.open_by_key("1hU11cmwMtNC8PfVg9gci7Gg6oaQ5dsHwTCcduLE6hJ4")
-wk = sh.worksheet('Лист3')
+wk = sh.worksheet('2023')
 g_clop=sheet_ready(load)
 wk.update('A1',g_clop)
