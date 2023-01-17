@@ -1,5 +1,6 @@
 from google.cloud import bigquery
 from google.oauth2 import service_account
+from clickhouse_py  import clickhouse_pandas, clickhouse_logger
 from oauth2client.service_account import ServiceAccountCredentials
 from sqlalchemy import create_engine
 import base64
