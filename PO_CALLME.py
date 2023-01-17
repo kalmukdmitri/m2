@@ -72,7 +72,7 @@ max(case when pagepath like '%personal-area/services/deal/create%' then 1 else 0
 max(case when pagepath like  '%personal-area/services/deal%' and pagepath like '%members%' then 1 else 0 end) as next_step
 from ga.PAGE_VIEWS
 where pagepath like  '%personal-area/services/deal%'
-and toDate(dateHourMinute) > '2022-09-30'
+and toDate(dateHourMinute) > '2022-12-30'
 group by view_dt,dimension4),
 sess AS (
 SELECT
@@ -138,6 +138,6 @@ drops = ['user_registration_date',
 load = load.drop(columns = drops)
 
 sh = gc.open_by_key("1hU11cmwMtNC8PfVg9gci7Gg6oaQ5dsHwTCcduLE6hJ4")
-wk = sh.worksheet('Лист1')
+wk = sh.worksheet('Лист3')
 g_clop=sheet_ready(load)
 wk.update('A1',g_clop)
