@@ -31,36 +31,70 @@ keys = json.loads(key_other)['pg']
 engine = create_engine(keys)
 
 
-q = '''WITH PAGE AS (
+# q = '''WITH PAGE AS (
+# select 
+# date(dateHourMinute) as view_dt,
+# dimension4,
+# MAX(case when pagepath like '%personal-area/services/deal/create%' then 1 else 0 end) as creat,
+# MAX(case when pagepath like  '%personal-area/services/deal%' and pagepath like '%members%' then 1 else 0 end) as next_step
+
+# from `UA_REPORTS.PAGE_VIEWS`
+# where pagepath like  '%personal-area/services/deal%'
+# and date(dateHourMinute) > '2022-09-30'
+
+# group by 1,2),
+# sess AS (
+# SELECT
+# session_id,
+# user_id,
+# dimension2
+# FROM `TEST_MART.SESSIONS_TABLE ` 
+# LEFT JOIN (SELECT dimension1,dimension2 FROM `UA_REPORTS.USERS_DT` GROUP BY 1,2) on dimension1 = user_id
+# -- WHERE dimension2 is not null
+# group by 1,2,3
+# )
+# SELECT  dimension2 as user_code, max(view_dt) as view_dt FROM PAGE
+# inner JOIN sess on session_id=dimension4
+# where next_step = 0
+# and creat = 1
+# -- and dimension2 is not null
+# group by dimension2
+
+# '''
+clk  = clickhouse_pandas('ga')
+q = '''
+WITH PAGE AS (
 select 
-date(dateHourMinute) as view_dt,
+toDate(dateHourMinute) as view_dt,
 dimension4,
-MAX(case when pagepath like '%personal-area/services/deal/create%' then 1 else 0 end) as creat,
-MAX(case when pagepath like  '%personal-area/services/deal%' and pagepath like '%members%' then 1 else 0 end) as next_step
-
-from `UA_REPORTS.PAGE_VIEWS`
+max(case when pagepath like '%personal-area/services/deal/create%' then 1 else 0 end) as creat,
+max(case when pagepath like  '%personal-area/services/deal%' and pagepath like '%members%' then 1 else 0 end) as next_step
+from ga.PAGE_VIEWS
 where pagepath like  '%personal-area/services/deal%'
-and date(dateHourMinute) > '2022-09-30'
-
-group by 1,2),
+and toDate(dateHourMinute) > '2022-09-30'
+group by view_dt,dimension4),
 sess AS (
 SELECT
 session_id,
 user_id,
-dimension2
-FROM `TEST_MART.SESSIONS_TABLE ` 
-LEFT JOIN (SELECT dimension1,dimension2 FROM `UA_REPORTS.USERS_DT` GROUP BY 1,2) on dimension1 = user_id
--- WHERE dimension2 is not null
-group by 1,2,3
+client_id
+FROM mart.SESSIONS_TABLE
+LEFT JOIN (SELECT dimension1,dimension2 FROM ga.USERS_DT GROUP BY dimension1,dimension2) as u on dimension1 = client_id
+
+group by session_id,
+user_id,
+client_id
 )
-SELECT  dimension2 as user_code, max(view_dt) as view_dt FROM PAGE
+SELECT  user_id as user_code,max(view_dt)  as view_dt FROM PAGE
 inner JOIN sess on session_id=dimension4
 where next_step = 0
 and creat = 1
--- and dimension2 is not null
-group by dimension2'''
+group by user_id'''
 
-pg = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+
+
+
+pg = clk.get_query_results(q)
 
 
 q = """select
