@@ -96,16 +96,16 @@ internal_table_dict = {
                            'source': 'external.UP_VAS_TABLE'},
     
     'export_pg.BQ_app_mau': {'resulter': '"STG_CLICK_WEBAPP"."APP_MAU"',
-                           'source': 'external.app_mau_view'},
+                           'source': 'export_pg.app_mau_view'},
   
     'export_pg.BQ_installs_by_date': {'resulter': '"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
-                           'source': 'external.installs_by_date_view'},
+                           'source': 'export_pg.installs_by_date_view'},
     
     'export_pg.BQ_installs_by_month': {'resulter': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
-                           'source': 'external.installs_by_month'},
+                           'source': 'export_pg.installs_by_month'},
     
     'export_pg.BQ_web_mau': {'resulter': '"STG_CLICK_WEBAPP"."WEB_MAU"',
-                           'source': 'external.web_mau'}git
+                           'source': 'export_pg.web_mau'}
 }
 
 engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
