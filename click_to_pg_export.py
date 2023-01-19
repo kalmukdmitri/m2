@@ -91,8 +91,21 @@ def upload_multipart(table_name, df):
 internal_table_dict = {
     'export_pg.NB_GAINS': {'resulter': '"STG_CLICK_WEBAPP"."NB_GAINS"',
                            'source': 'export_pg.NB_GAINS_VIEW'},
+    
     'export_pg.UP_VAS_TABLE': {'resulter': '"STG_CLICK_WEBAPP"."UP_VAS_TABLE"',
-                           'source': 'external.UP_VAS_TABLE'}
+                           'source': 'external.UP_VAS_TABLE'},
+    
+    'export_pg.BQ_app_mau': {'resulter': '"STG_CLICK_WEBAPP"."APP_MAU"',
+                           'source': 'external.app_mau_view'},
+  
+    'export_pg.BQ_installs_by_date': {'resulter': '"STG_CLICK_WEBAPP"."INSTALLS_BY_DATE"',
+                           'source': 'external.installs_by_date_view'},
+    
+    'export_pg.BQ_installs_by_month': {'resulter': '"STG_CLICK_WEBAPP"."INSTALLS_BY_MONTH"',
+                           'source': 'external.installs_by_month'},
+    
+    'export_pg.BQ_web_mau': {'resulter': '"STG_CLICK_WEBAPP"."WEB_MAU"',
+                           'source': 'external.web_mau'}git
 }
 
 engine = create_engine(keys).execution_options(isolation_level="AUTOCOMMIT")
