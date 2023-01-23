@@ -174,8 +174,7 @@ for client_data in clients:
 final_data = pandas.concat(final_dfs)
 final_data['date'] = final_data['day'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d" ).date())
 
-final_data['spent'] = final_data['spent'].apply(lambda x: float(x)
-
+final_data['spent'] = final_data['spent'].apply(lambda x: float(x))
 
 final_data = final_data.drop(columns = ['day']).reset_index(drop=True)
 
