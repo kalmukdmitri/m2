@@ -242,6 +242,22 @@ tables = [
                               {'expression': 'ga:hits'}
                              ],
                 'filters': ''}}, 
+    {'name': 'ga.HOSTS',
+     'bq_name': 'ga.HOSTS',
+     'funcs' : all_session,
+     'funcs_bq' : all_session,
+     'date_partition' : 'date',
+     'params': {'dimetions': [
+                              {'name': 'ga:date'},
+                              {'name': 'ga:dimension4'},
+                              {'name': 'ga:landingpagepath'},
+                              {'name': 'ga:hostname'},
+                             ],
+                'metrics':   [
+                              {'expression': 'ga:sessions'},
+                             ],
+                'filters': 'ga:hostname=~(nn|ekb)'}},     
+    
     {'name': 'ga.RAW_EVENTS_IB_REQUESTS',
      'bq_name': 'UA_REPORTS.RAW_EVENTS_IB_REQUESTS',
      'funcs' : all_event_transform,
