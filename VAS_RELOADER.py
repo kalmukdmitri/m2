@@ -87,6 +87,8 @@ V_CL_PHONE_CLICK_BY_PARTNERS_new.columns = [
  'Conversion_to_call' ]
 V_CL_PHONE_CLICK_BY_PARTNERS_new['Geo'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Geo'].astype(str)
 V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'].astype(str)
+V_CL_PHONE_CLICK_BY_PARTNERS_new['Week'] =  V_CL_PHONE_CLICK_BY_PARTNERS_new['Week'].astype(int)
+V_CL_PHONE_CLICK_BY_PARTNERS_new['Month'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Month'].astype(int)
 
 V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new.columns = [
  'date',
