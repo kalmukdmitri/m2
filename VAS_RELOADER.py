@@ -89,7 +89,7 @@ V_CL_PHONE_CLICK_BY_PARTNERS_new['Geo'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Geo'
 V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'].astype(str)
 V_CL_PHONE_CLICK_BY_PARTNERS_new['Week'] =  V_CL_PHONE_CLICK_BY_PARTNERS_new['Week'].astype(int)
 V_CL_PHONE_CLICK_BY_PARTNERS_new['Month'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Month'].astype(int)
-
+V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'] = V_CL_PHONE_CLICK_BY_PARTNERS_new['Partner'].apply(lambda x :  '' if x == 'nan' else x)
 V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new.columns = [
  'date',
  'Week',
@@ -111,6 +111,7 @@ V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Chanell'] = V_CL_PHONE_CLICK_BY_PARTNERS_V
 V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Week'] =  V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Week'].astype(int)
 V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Month'] = V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Month'].astype(int)
 V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new = V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new.fillna(0)
+V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Partner'] = V_CL_PHONE_CLICK_BY_PARTNERS_VAS_new['Partner'].apply(lambda x :  '' if x == 'nan' else x)
 
 def upload_multipart(table_name, df):
     
