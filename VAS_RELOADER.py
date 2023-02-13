@@ -11,7 +11,6 @@ import pandas
 import pandas_gbq
 import requests
 import string
-!pip install transliterate
 from transliterate import translit, get_available_language_codes
 
 def get_df(query, engine):
