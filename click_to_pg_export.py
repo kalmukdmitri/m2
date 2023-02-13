@@ -164,7 +164,7 @@ for table in internal_table_dict:
                 q = f'''INSERT INTO {table} SELECT * FROM {internal_table_dict[table]['source']};'''
                 print(q)
 
-                clk.get_query_results(q)
+                clk.\query_results(q)
 
                 logging.info(f"Sleeping 10 seconds before checking rows count table.")
                 time.sleep(10)
