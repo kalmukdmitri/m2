@@ -77,7 +77,7 @@ group by view_dt,dimension4),
 sess AS (
 SELECT
 session_id,
-user_code_general,
+user_code_general as user_id,
 client_id
 FROM mart.SESSIONS_TABLE
 LEFT JOIN (SELECT dimension1,dimension2 FROM ga.USERS_DT GROUP BY dimension1,dimension2) as u on dimension1 = client_id
