@@ -11,7 +11,6 @@ import pandas
 import pandas_gbq
 import requests
 import string
-from transliterate import translit, get_available_language_codes
 
 def get_df(query, engine):
     df_check = engine.execute(query)
