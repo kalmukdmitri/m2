@@ -26,7 +26,7 @@ key_path = '/home/kalmukds/m2-main-cd9ed0b4e222.json'
 # gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 clk = clickhouse_pandas('ga')
 
-key_path_pg = '/home/kalmukds/pg_keys.json'
+key_path_pg = '/home/kalmukds/pg_keys_special.json'
 # key_path_pg = '/home/kalmukds/pg_internal.json'
 # key_path_pg = 'C:\\Users\\kalmukds\\NOTEBOOKs\\projects\\keys\\pg_keys_special.json'
 f = open(key_path_pg, "r")
