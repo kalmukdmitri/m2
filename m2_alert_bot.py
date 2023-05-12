@@ -21,12 +21,12 @@ group by date
 order by date desc
 limit 10;
 '''],
-    ['newMatomo.matomo_log_visit', 
+    ['matomo.matomo_log_visit', 
      '''Select date(visit_last_action_time) as date,
-    count(distinct idvisit) as matomo_click_sessions from newMatomo.matomo_log_visit
+    count(distinct idvisit) as matomo_click_sessions from matomo.matomo_log_visit
 group by date
 order by date desc
-limit 10;'''],
+limit 10'''],
     
 ]
 
@@ -85,7 +85,6 @@ method = "sendMessage"
 
 chats = ['-905046807','-1001787794078']
 url = "https://api.telegram.org/bot{token}/{method}".format(token=token_local, method=method)
-
 
 s_table= str(full_table)
 message = "Data collected on " + str(datetime.datetime.today().date())+'\n'+ s_table
